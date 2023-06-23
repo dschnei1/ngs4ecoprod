@@ -1,0 +1,251 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Taxonomy to long-reads
+# Dominik Schneider, 2023-04-05
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Set defaults
+export processes=1
+export threads=1
+export memory=
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_np_tax -i <folder_with_qf_data> -o <output_folder> -d <db_folder> -p <processes> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_np_tax -i ~/ngs4_np -d ~/860_EVO_4TB/NGS-4-ECOPROD/db/ -p 1 -t 10 -m"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Folder containing quality filtered fastq.gz"
+   echo "         -d     Path to databases (kraken2 & kaiju)"
+   echo "         -p     Number of processes [default: $processes]"
+   echo "                NOTE: per process you need 183-470 Gb of RAM"
+   echo "         -t     Number of CPU threads per process [default: $threads]"
+   echo "         -m     Reduce RAM requirements to 183 Gb (--memory-mapping for kraken2), slower"
+   echo "                NOTE: If your database is NOT located on a SSD expect long processing times"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts p:t:i:d:":h:m" flag
+do
+    case "${flag}" in
+        p) processes=${OPTARG};;
+        t) threads=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        d) db_path=${OPTARG};;
+        h) Help;exit;;
+        m) memory=--memory-mapping;;
+       \?) echo "Error: Invalid option";exit;;
+    esac
+done
+
+
+
+# Error handling
+# set -e # removed due to halt on replaced taxon IDs
+
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_np_tax -h to see all necessary options\033[0;37m" 1>&2
+    exit 1
+fi
+
+if [[ -z "$db_path" ]]; then
+    echo -e "\033[1;31mError: database path -d not set! ngs4_np_tax -h to see all necessary options\033[0;37m" 1>&2
+    exit 1
+fi
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m----------------------------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD metagenome pipeline - Taxonomy to long-reads"
+echo -e "\033[1;31m----------------------------------------------------------"
+echo -e "\e[37m"
+echo "Number of processes:             $processes"
+echo "Number of threads per process:   $threads"
+echo "Database folder:                 $db_path"
+echo "Input folder:                    $input_folder/01_quality_filtered_data"
+echo "Output folder:                   $input_folder/02_tax_assignment"
+echo
+echo "Software:"
+echo "$(parallel --version | head -n 1)"
+echo "Kraken2 $(kraken2 --version | head -n 1 | sed "s/.*version //g")"
+echo "$(kaiju -h 2> kaiju_version; grep "Kaiju" kaiju_version; rm -f kaiju_version)"
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+Rscript $(which version_info.R) | grep "ampvis2\|stringr" | sed "s| *|| ; s| .* | |g"
+echo
+echo "Databases:"
+echo "kraken2 database age             $(stat -c %y $db_path/kraken2/hash.k2d | sed 's/ .*//g')"
+echo "kaiju database age               $(stat -c %y $db_path/kaiju/kaiju_db_nr_euk.fmi | sed 's/ .*//g')"
+
+
+
+# Create sample list
+
+cd $input_folder
+mkdir 02_tax_assignment
+cd 02_tax_assignment
+ln -s ../01_quality_filtered_data/*.gz .
+
+
+
+# kraken2
+echo
+echo -e "\033[1;33mRunning kraken2"
+echo -e "\e[37m"
+
+ls -1 *.fastq.gz | sed "s/.fastq.gz//g" > fastqlist
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'echo "Finished kraken2 on sample --> {}"; kraken2 --db '$db_path'/kraken2 {}.fastq.gz --gzip-compressed --threads '$threads' --output {/.}.kraken2 '$memory' 2> {}_kraken2.log'
+parallel --load 80% --noswap -j $processes -a fastqlist 'cut -f1,2,3 {/.}.kraken2 > {/.}.kraken2.out'
+parallel --load 80% --noswap -j $processes -a fastqlist 'rm {/.}.kraken2 -f'
+
+mkdir 01_kraken2
+mv *.log 01_kraken2
+mv *.out 01_kraken2
+
+
+
+# Kaiju
+echo
+echo -e "\033[1;33mRunning kaiju"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'echo "Finished kaiju on sample --> {}"; kaiju -z '$threads' -t '$db_path'/kaiju/nodes.dmp -f '$db_path'/kaiju/kaiju_db_nr_euk.fmi -i {}.fastq.gz -o {}.kaiju -v 2> {}_kaiju.log'
+parallel --load 80% --noswap -j $processes -a fastqlist 'cut -f1,2,3 {}.kaiju > {}.kaiju.out'
+parallel --load 80% --noswap -j $processes -a fastqlist 'rm {}.kaiju -f'
+
+mkdir 02_kaiju
+mv *.log 02_kaiju
+mv *.out 02_kaiju
+
+
+
+# Combine kraken2 and kaiju output (kraken2 > kaiju)
+parallel --load 80% --noswap -j $processes -a fastqlist 'grep "^U" 01_kraken2/{}.kraken2.out | cut -f2 > {}.unclassified'
+parallel --load 80% --noswap -j $processes -a fastqlist 'grep -F -w -f {}.unclassified 02_kaiju/{}.kaiju.out > {}.kaiju.classified'
+parallel --load 80% --noswap -j $processes -a fastqlist 'rm {}.unclassified -f'
+parallel --load 80% --noswap -j $processes -a fastqlist 'cat <(grep "^C" 01_kraken2/{}.kraken2.out) {}.kaiju.classified > {}.k2k'
+parallel --load 80% --noswap -j $processes -a fastqlist 'rm {}.kaiju.classified -f'
+
+mkdir 03_merge
+mv *.k2k 03_merge
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'addTaxonNames -t '$db_path'/kaiju/nodes.dmp -n '$db_path'/kaiju/names.dmp -r superkingdom,phylum,class,order,family,genus,species -i 03_merge/{}.k2k -o {}.tax_table'
+parallel --load 80% --noswap -j $processes -a fastqlist 'sed -i -e "s/; \([^; ]*\)$/\1/" {}.tax_table'
+sed -i "s/'//g" *.tax_table
+sed -i 's/"//g' *.tax_table
+
+
+
+# Use R to combine tables
+Rscript $(which k2k2table.R)
+mv ngs4_tax_table.tsv ngs4_np_tax_table.tsv
+
+
+
+# Build classification summary
+echo
+echo -e "\033[1;33mClassification summary"
+echo -e "\e[37m"
+
+
+
+# Grab classified vs unclassified
+grep -H -c "^C" 01_kraken2/*.out | sed "s|01_.*/||g ; s|\.kraken2.*:|\t|g" > kraken2.classified
+grep -H -c "^U" 01_kraken2/*.out | sed "s|01_.*/||g ; s|\.kraken2.*:|\t|g" > kraken2.unclassified
+
+grep -H -c "^C" 02_kaiju/*.out | sed "s|02_.*/||g ; s|\.kaiju.*:|\t|g" > kaiju.classified
+grep -H -c "^U" 02_kaiju/*.out | sed "s|02_.*/||g ; s|\.kaiju.*:|\t|g" > kaiju.unclassified
+
+grep -H -c "^C" 03_merge/*.k2k | sed "s|03_.*/||g ; s|\.k2k.*:|\t|g" > merge.classified
+grep -H -c "^U" 03_merge/*.k2k | sed "s|03_.*/||g ; s|\.k2k.*:|\t|g" > merge.unclassified
+
+paste kraken2.classified kraken2.unclassified kaiju.classified kaiju.unclassified merge.classified merge.unclassified > all.tsv
+awk -F'\t' '{print $1"\t"$2"\t"$4"\t"$6"\t"$8"\t"$10"\t"$12 }' all.tsv > ngs4_np_tax_stats.tsv
+
+rm -f *.classified *.unclassified all.tsv *.tax_table
+
+sed -i '1iSample\tClassified (kraken2)\tUnclassified (kraken2)\tClassified (kaiju)\tUnclassified (kaiju)\tClassified (merge)\tUnclassified (merge)' ngs4_np_tax_stats.tsv
+
+
+
+# Use R to polish table
+Rscript $(which stats_wrapper_np_tax.R)
+rm ngs4_np_tax_stats.tsv -f
+
+cat ngs4_np_tax_report.tsv | sed 's/\t/|/g' | column -t -s $"|"
+
+
+
+# Database date
+stat -c %y $db_path/kraken2/hash.k2d > kraken2.date
+stat -c %y $db_path/kaiju/kaiju_db_nr_euk.fmi > kaiju.date
+
+
+
+# Cleanup
+sed "1i SampleID" fastqlist > metadata.tsv
+rm fastqlist -f
+mkdir 04_summary
+mv *.tsv 04_summary
+
+cp $(which metagenome_np_tax.R) 04_summary
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD metagenome pipeline - Taxonomy to long-reads finished!"
+echo -e "\033[0;37m"
+
+echo -e "\033[0;37mYou can analyze your results with:"
+echo -e "\033[1;32mcd $input_folder/02_tax_assignment/04_summary && rstudio metagenome_np_tax.R"
+echo -e "\033[0;37m"
+
+
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_np_tax_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_np_tax_* $input_folder

@@ -1,0 +1,81 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Download modified silva database
+# Dominik Schneider, 2023-02-13
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_download_silva_db -i <destination_folder_for_ngs4ecoprod>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Installation folder of silva database"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts i:":h" flag
+do
+    case "${flag}" in
+        i) install_dir=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+IF="$install_dir/silva"
+if [ -d "$IF" ]; then
+  echo -e "\033[1;31mError database folder $IF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+if [ -d "$IF" ]; then
+  mkdir $install_dir
+fi
+
+# Main script
+
+echo
+echo -e "\033[1;31m-------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD silva database download"
+echo -e "\033[1;31m-------------------------------------"
+echo -e "\e[37m"
+echo "Installation folder:             $install_dir/silva"
+
+
+
+# Download and extract silva database
+echo
+echo -e "\033[1;33mDownloading & installing silva databse..."
+echo -e "\e[37m"
+wget -q --show-progress -c https://zenodo.org/record/7745860/files/silva_138.1.tar.gz --directory-prefix $install_dir/silva && tar -xzf $install_dir/silva/silva_138.1.tar.gz -C $install_dir/silva && rm -f $install_dir/silva/silva_138.1.tar.gz
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD silva database download & installation finished"
+echo -e "\033[0;37m"

@@ -1,0 +1,173 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Assembly & Binning of quality filtered long-reads
+# Dominik Schneider, 2023-04-05
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Set defaults
+export processes=1
+export threads=1
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_np_assembly -i <folder_with_qf_data> -o <output_folder> -d <db_folder> -p <processes> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_np_assembly -i ~/ngs4_np -p 1 -t 20"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Folder containing quality filtered fastq.gz"
+   echo "         -p     Number of processes [default: $processes]"
+   echo "                NOTE: Better ony use one process here - depending on your system"
+   echo "         -t     Number of CPU threads per process [default: $threads]"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts p:t:i:":h" flag
+do
+    case "${flag}" in
+        p) processes=${OPTARG};;
+        t) threads=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        h) Help;exit;;
+       \?) echo "Error: Invalid option";exit;;
+    esac
+done
+
+
+
+# Error handling
+# set -e # removed due to halt on replaced taxon IDs
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_np_assembly -h to see all necessary options\033[0;37m" 1>&2
+    exit 1
+fi
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m----------------------------------------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD metagenome pipeline - Assembly and binning of long-reads"
+echo -e "\033[1;31m----------------------------------------------------------------------"
+echo -e "\e[37m"
+echo "Number of processes:             $processes"
+echo "Number of threads per process:   $threads"
+echo "Database folder:                 $db_path"
+echo "Input folder:                    $input_folder/01_quality_filtered_data"
+echo "Output folder:                   $input_folder/03_assembly"
+echo
+echo "Software:"
+echo "$(parallel --version | head -n 1)"
+nanophase -v | sed "s|v=||g"
+metawrap -v > temp_file && grep "v=" temp_file | sed "s|v=||g" && rm -f temp_file
+echo "flye $(flye -v)"
+metabat2 -h 2> temp_file && grep "version" temp_file | sed "s|: Meta.* (version 2:| |g ; s| (Bioc.*||g" && rm -f temp_file
+maxbin2 -v > temp_file && head -n 1 temp_file && rm -f temp_file
+echo "SemiBin $(SemiBin -v)"
+checkm -h > temp_file && grep "CheckM" temp_file | head -n 1 | sed "s|.*: ||g ; s| :.*||g" && rm -f temp_file
+echo "racon $(racon --version)"
+medaka --version
+polypolish -V | sed "s| v| |g"
+masurca -v | sed "s|version|POLCA|g"
+bwa 2>&1 | grep "Version" | sed "s|Version:|bwa|g"
+seqtk 2>&1 | grep "Version" | sed "s|Version:|seqtk|g"
+echo "minimap2 $(minimap2 --version)"
+bbmap.sh --version 2>&1 | grep "^BBMap" | sed "s|version ||g"
+perl -v 2>&1 | head -n 2 | grep "perl" | sed "s|.* (v|perl |g ; s|) .*||g"
+samtools version | head -n 1
+gtdbtk 2>&1 | grep ":::" | sed "s|.*.::: ||g ; s|v||g ; s|:::.*||g"
+fastANI -v 2>&1 | head -n 1 | sed "s|version|fastANI|g"
+blastp -version 2>&1 | head -n 1 | sed "s|:||g" 
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+Rscript $(which version_info.R) | grep "ampvis2\|stringr" | sed "s| *|| ; s| .* | |g"
+
+
+
+# Create sample list
+
+cd $input_folder
+mkdir 03_assembly
+cd 03_assembly
+ln -s ../01_quality_filtered_data/*.gz .
+
+
+
+# NanoPhase
+echo
+echo -e "\033[1;33mRunning NanoPhase"
+echo -e "\e[37m"
+
+ls -1 *.fastq.gz | sed "s|.fastq.gz||g" > fastqlist
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'echo "Finished NanoPhase on sample --> {}"; mkdir {}_out; nanophase meta -l {}.fastq.gz -t '$threads' -o {}_out > ./{}_out/{}_nanophase.log 2> /dev/null'
+rm -f *.gz
+mkdir 02_final_bins
+parallel --load 80% --noswap -j $processes -a fastqlist 'mkdir 02_final_bins/{} ; cp {}_out/03-Polishing/Final-bins/*.fasta 02_final_bins/{} 2> /dev/null; cp {}_out/03-Polishing/nanophase.ont.genome.summary 02_final_bins/{}_summary.tsv 2> /dev/null; sed -i "s|#||g" 02_final_bins/{}_summary.tsv 2> /dev/null'
+mkdir 01_nanophase
+parallel --load 80% --noswap -j $processes -a fastqlist 'mv {}_out 01_nanophase'
+
+# Output bin info
+echo
+echo -e "\033[1;33mMAG statistics"
+echo -e "\e[37m"
+
+cd 02_final_bins
+Rscript $(which stats_wrapper_np_assembly.R)
+parallel --load 80% --noswap -j $processes -a ../fastqlist 'rm -f {}_summary.tsv'
+
+cat ngs4_np_assembly_report.tsv | sed 's/\t/|/g' | column -t -s $"|"
+mv ngs4_np_assembly_report.tsv ../
+rm -f ../fastqlist
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD metagenome pipeline - Assembly & binning finished!"
+echo -e "\033[0;37m"
+
+
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_np_assembly_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_np_assembly_* $input_folder

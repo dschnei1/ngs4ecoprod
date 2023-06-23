@@ -1,0 +1,275 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Nanopore quality filter
+# Dominik Schneider, 2023-04-03
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Set defaults
+export processes=1
+export threads=1
+export min_length=500
+export min_quality=15
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_np_qf -i <folder_with_raw_nanopore_data> -o <output_folder> -p <processes> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_np_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data/nanopore -o ~/ngs4_np -p 3 -t 8"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Input folder containing nanopore raw data as fastq.gz"
+   echo "                Note: files must be named according to the following scheme (ending with .fastq.gz)"
+   echo "                SampleName.fastq.gz"
+   echo "         -o     Output folder"
+   echo "         -q     Optional: Minimum phred score [default: $min_quality]"
+   echo "                Note: you might have to lower these for old chemistry/flow cells (<R10.4)"
+   echo "         -l     Optional: Minimum length of nanopore read [default: $min_length]"
+   echo "         -p     Number of processes [default: $processes]"
+   echo "         -t     Number of CPU threads per process [default: $threads]"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts p:t:i:o:d:l:q:":h" flag
+do
+    case "${flag}" in
+        p) processes=${OPTARG};;
+        t) threads=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        o) output_folder=${OPTARG};;
+        l) min_length=${OPTARG};;
+        q) min_quality=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_np_qf -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+if [[ -z "$output_folder" ]]; then
+    echo -e "\033[1;31mError: output folder path -o not set! ngs4_np_qf -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+
+
+# Check folder and return error
+IF="$input_folder"
+if [ ! -d "$IF" ]; then
+  echo -e "\033[1;31mError input folder $IF does not exist. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+OF="$output_folder"
+if [ -d "$OF" ]; then
+  echo -e "\033[1;31mError output folder $OF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m-------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD Nanopore quality filter"
+echo -e "\033[1;31m-------------------------------------"
+echo -e "\e[37m"
+echo "Number of processes:             $processes"
+echo "Number of threads per process:   $threads"
+echo "Number of threads total:         $(($processes*$threads))"
+echo "Input folder:                    $input_folder"
+echo "Output folder:                   $output_folder"
+echo "Minimum sequence length:         $min_length"
+echo "Minimum phred quality:           $min_quality"
+echo
+echo "Software:"
+echo "$(parallel --version | head -n 1)"
+fastp --version
+echo "porechop_abi $(porechop_abi --version)"
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+
+
+
+# Create sample list
+
+mkdir $output_folder
+ln -s $input_folder/*.fastq.gz $output_folder
+cd $output_folder
+ls -1 *.fastq.gz | sed "s/.fastq.gz//g" > fastqlist
+
+
+
+# Run fastp on data
+echo
+echo -e "\033[1;33mRunning basic quality filter (fastp)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'echo "Finished fastp on sample --> {}"; fastp -i {}.fastq.gz -o QF~{}.fastq.gz -h {}.html -j {}.json --thread '$threads' --average_qual '$min_quality' --correction --qualified_quality_phred '$min_quality' --cut_mean_quality '$min_quality' --cut_front --cut_tail --cut_window_size 10 --qualified_quality_phred 8 --n_base_limit 0 --length_required '$min_length' --compression 6 >&- 2>&-'
+
+
+
+# Create folder structure
+
+mkdir 01_quality_filtered_data
+mkdir 01_quality_filtered_data/01_fastp
+mv QF~* 01_quality_filtered_data
+rm *.fastq.gz -f
+
+mv *.html 01_quality_filtered_data/01_fastp
+mv *.json 01_quality_filtered_data/01_fastp
+
+cd 01_quality_filtered_data
+rename "s|QF~||g" *.fastq.gz
+
+mkdir 02_porechop_abi
+
+
+
+# Run porechop_abi on data
+
+echo
+echo -e "\033[1;33mRunning adapter removal and splitting (porechop_abi)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a ../fastqlist 'echo "Finished porechop_abi on sample --> {}"; porechop_abi -abi -i {}.fastq.gz -o PC~{}.fastq.gz -v 1 --threads '$threads' &> {}_porechop_abi.log'
+
+rename "s|PC~||g" *.fastq.gz -f
+
+mv *.log 02_porechop_abi
+
+rm -f ../fastqlist
+rm -rf tmp
+
+
+# Create data statistics
+
+echo
+echo -e "\033[1;33mSample statistics"
+echo -e "\e[37m"
+
+# For fastp
+cd 01_fastp
+
+# Read length befor filtering
+grep "read1_mean_length" *.json -m 1 -H | sed 's/"read1_mean_length"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > forward_read_length_before.tsv
+# Read count before filtering
+grep "total_reads" *.json -m 1 -H | sed 's/"total_reads"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > reads_before.tsv
+# Basepairs before filtering
+grep "total_bases" *.json -m 1 -H | sed 's/"total_bases"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > bp_before.tsv
+# GC content before filtering
+grep "gc_content" *.json -m 1 -H | sed 's/"gc_content"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > gc_before.tsv
+# Read length after filtering
+grep "read1_mean_length" *.json -H | awk 'NR % 2 == 0' | sed 's/"read1_mean_length"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > forward_read_length_after.tsv
+# Read count after filtering
+grep "total_reads" *.json -m 2 -H | awk 'NR % 2 == 0' | sed 's/"total_reads"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > reads_after.tsv
+# Basepairs after filtering
+grep "total_bases" *.json -m 2 -H | awk 'NR % 2 == 0' | sed 's/"total_bases"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > bp_after.tsv
+# GC content after filtering
+grep "gc_content" *.json -m 2 -H | awk 'NR % 2 == 0' | sed 's/"gc_content"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > gc_after.tsv
+# Combine tables
+paste forward_read_length_before.tsv reads_before.tsv bp_before.tsv gc_before.tsv forward_read_length_after.tsv reads_after.tsv bp_after.tsv gc_after.tsv > sequences_stats.tsv
+# Extract interesting columns
+sed -r 's/:/\t/g' sequences_stats.tsv | awk -F'\t' '{print $1"\t"$2"\t"$4"\t"$6"\t"$8"\t"$10"\t"$12"\t"$14"\t"$16 }' > sequences_stats_final.tsv
+# Add headers
+sed -i '1i#Sample\t#Read length (before QF)\t#Read count (before QF)\t#Base pairs (before QF)\t#GC content (before QF)\t#Read length (after QF)\t#Read count (after QF)\t#Base pairs (after QF)\t#GC content (after QF)' sequences_stats_final.tsv
+# Remove temporary files
+rm bp_after.tsv bp_before.tsv forward_read_length_after.tsv forward_read_length_before.tsv gc_after.tsv gc_before.tsv reads_after.tsv reads_before.tsv sequences_stats.tsv -f
+
+mv sequences_stats_final.tsv ../fastp.tsv -f
+cd ..
+
+# For cutadapt
+cd 02_porechop_abi
+
+grep "had adapters trimmed from their start" *.log -m 1 -H | sed 's/_porechop_abi.log:/\t/g ; s| / .* reads had adapters trimmed from their start (|\t|g ; s| bp removed)||g' > forward_read_adapter.tsv
+grep "had adapters trimmed from their end" *.log -m 1 -H | sed 's/_porechop_abi.log:/\t/g ; s| / .* reads had adapters trimmed from their end (|\t|g ; s| bp removed)||g' > reverse_read_adapter.tsv
+grep "reads were split based on middle adapters" *.log -m 1 -H | sed 's/_porechop_abi.log:/\t/g ; s| / .* reads were split based on middle adapters|\t|g' > reads_split.tsv
+paste forward_read_adapter.tsv reverse_read_adapter.tsv reads_split.tsv > sequences_stats_porechop_abi.tsv
+
+# Extract interesting columns
+awk -F'\t' '{print $1"\t"$2"\t"$3"\t"$5"\t"$6"\t"$8 }' sequences_stats_porechop_abi.tsv > temp_file && mv temp_file sequences_stats_final.tsv
+# Add headers
+sed -i '1i#Sample\t#Reads_forward_adapter\t#bp_removed\t#Read_reverse_adapter\t#bp_removed\t#reads_split' sequences_stats_final.tsv
+# Cleanup
+rm forward_read_adapter.tsv reverse_read_adapter.tsv reads_split.tsv sequences_stats_porechop_abi.tsv -f
+
+mv sequences_stats_final.tsv ../porechop_abi.tsv -f
+cd ..
+
+
+# Final sequence number and base pairs
+for i in *.fastq.gz; do no_ext=${i%\.fastq.gz}; echo -e "$no_ext\t$(zcat "$no_ext".fastq.gz | awk 'NR%4==2{c++; l+=length($0)} END{ print c "\t" l }')" >> final_stats.tsv; done
+sed -i '1i#Sample\t#Final_number_sequences\t#Final_bp' final_stats.tsv
+
+# Use R to combine tables
+Rscript $(which stats_wrapper_np_qf.R)
+
+# Display sequence statistics
+cat ngs4_np_qf_report.tsv | sed 's/\t/|/g' | column -t -s $"|"
+
+# Cleanup
+mkdir 03_summaries
+mv *.tsv 03_summaries
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD Nanopore quality filter finished!"
+echo -e "\033[0;37m"
+
+
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_np_qf_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_np_qf_* $output_folder

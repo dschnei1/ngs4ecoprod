@@ -1,0 +1,288 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Quality filter for short-reads
+# Dominik Schneider, 2023-04-11
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Set defaults
+export processes=1
+export threads=1
+export min_length=50
+export min_quality=20
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_qf -i <folder_with_raw_data> -o <output_folder> -d <db_folder> -p <processes> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ecoprod/ngs4ecoprod/db -p 3 -t 14 -l 100 -q 30"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Input folder containing paired-end fastq.gz"
+   echo "                Note: files must be named according to the following scheme"
+   echo "                Sample_name_R1.fastq.gz"
+   echo "                Sample_name_R2.fastq.gz"
+   echo "         -o     Output folder"
+   echo "         -d     Path to databases"
+   echo "         -l     Optional: Minimum length of sequence in bp [default: $min_length]"
+   echo "         -q     Optional: Minimum phred score [default: $min_quality]"
+   echo "         -p     Number of processes [default: $processes]"
+   echo "         -t     Number of CPU threads per process [default: $threads]"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts p:t:i:o:d:l:q:":h" flag
+do
+    case "${flag}" in
+        p) processes=${OPTARG};;
+        t) threads=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        o) output_folder=${OPTARG};;
+        d) db_path=${OPTARG};;
+        l) min_length=${OPTARG};;
+        q) min_quality=${OPTARG};;
+        h) Help;exit;;
+       \?) echo "Error: Invalid option";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_qf -h to see all necessary options\033[0;37m" 1>&2
+    exit 1
+fi
+
+if [[ -z "$output_folder" ]]; then
+    echo -e "\033[1;31mError: output folder path -o not set! ngs4_qf -h to see all necessary options\033[0;37m" 1>&2
+    exit 1
+fi
+
+if [[ -z "$db_path" ]]; then
+    echo -e "\033[1;31mError: database path -d not set! ngs4_qf -h to see all necessary options\033[0;37m" 1>&2
+    exit 1
+fi
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m--------------------------------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD metagenome pipeline - Quality filter short-reads"
+echo -e "\033[1;31m--------------------------------------------------------------"
+echo -e "\e[37m"
+echo "Number of processes:             $processes"
+echo "Number of threads per process:   $threads"
+echo "Database folder:                 $db_path"
+echo "Input folder:                    $input_folder"
+echo "Output folder:                   $output_folder/01_quality_filtered_data"
+echo "Minimum sequence length:         $min_length"
+echo "Minimum phred quality:           $min_quality"
+echo
+echo "Software:"
+echo "$(parallel --version | head -n 1)"
+fastp --version
+echo "cutadapt $(cutadapt --version)"
+echo "bowtie2 $(bowtie2 --version | head -n 1 | sed 's|.* version ||')"
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+
+
+
+# Create sample list
+
+mkdir $output_folder
+ln -s $input_folder/*.fastq.gz $output_folder
+cd $output_folder
+ls -1 *_R1.fastq.gz | sed "s/_R1.fastq.gz//g" > fastqlist
+
+
+
+# Run fastp on data
+echo
+echo -e "\033[1;33mRunning quality filter (fastp)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'echo "Finished fastp on sample --> {}"; fastp -i {}_R1.fastq.gz -I {}_R2.fastq.gz -o QF~{}_R1.fastq.gz -O QF~{}_R2.fastq.gz -h {}.html -j {}.json --thread '$threads' --average_qual '$min_quality' --correction --qualified_quality_phred '$min_quality' --cut_mean_quality '$min_quality' --cut_front --cut_tail --cut_window_size 4 --length_required '$min_length' --compression 5 --detect_adapter_for_pe >&- 2>&-'
+
+
+
+# Create folder structure
+
+mkdir 01_quality_filtered_data
+mkdir 01_quality_filtered_data/01_fastp
+mv QF~* 01_quality_filtered_data
+
+mv *.html 01_quality_filtered_data/01_fastp
+mv *.json 01_quality_filtered_data/01_fastp
+
+cd 01_quality_filtered_data
+rename "s|QF~||g" *.fastq.gz
+
+mkdir 02_cutadapt
+mkdir 03_bowtie2
+
+
+
+# Remove potential sequencing adapter leftovers with cutadapt
+
+echo
+echo -e "\033[1;33mRunning additional adapter removal (cutadapt)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a ../fastqlist 'echo "Finished cutadapt on sample --> {}";cutadapt -O 6 -m '$min_length' --trim-n --times 2 -j '$threads' -g file:'$db_path'/illumina_adapter/fastqc_adapter.fasta -a file:'$db_path'/illumina_adapter/fastqc_adapter_reverse.fasta -G file:'$db_path'/illumina_adapter/fastqc_adapter.fasta -A file:'$db_path'/illumina_adapter/fastqc_adapter_reverse.fasta -o cut~{}_R1.fastq.gz -p cut~{}_R2.fastq.gz {}_R1.fastq.gz {}_R2.fastq.gz > 02_cutadapt/{}_cutadapt.log'
+
+rename "s|cut~||g" *.fastq.gz -f
+
+
+
+# Remove potential phiX leftover
+
+echo
+echo -e "\033[1;33mRunning phiX removal (bowtie2)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a ../fastqlist 'echo "Finished phiX removal on sample --> {}"; bowtie2 -x '$db_path'/phiX/phiX -1 {}_R1.fastq.gz -2 {}_R2.fastq.gz --un-conc-gz {} -p '$threads' --very-fast 1> /dev/null 2> {}_bowtie2.log && mv {}.1 {}_R1.fastq.gz -f && mv {}.2 {}_R2.fastq.gz'
+
+mv *_bowtie2.log 03_bowtie2
+
+
+
+# Create data statistics
+
+echo
+echo -e "\033[1;33mSample statistics"
+echo -e "\e[37m"
+
+# For fastp
+cd 01_fastp
+
+# Read length befor filtering
+grep "read1_mean_length" *.json -m 1 -H | sed 's/"read1_mean_length"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > forward_read_length_before.tsv
+grep "read2_mean_length" *.json -m 1 -H | sed 's/"read2_mean_length"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > reverse_read_length_before.tsv
+# Read count before filtering
+grep "total_reads" *.json -m 1 -H | sed 's/"total_reads"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > reads_before.tsv
+# Basepairs before filtering
+grep "total_bases" *.json -m 1 -H | sed 's/"total_bases"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > bp_before.tsv
+# GC content before filtering
+grep "gc_content" *.json -m 1 -H | sed 's/"gc_content"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > gc_before.tsv
+# Read length after filtering
+grep "read1_mean_length" *.json -H | awk 'NR % 2 == 0' | sed 's/"read1_mean_length"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > forward_read_length_after.tsv
+grep "read2_mean_length" *.json -H | awk 'NR % 2 == 0' | sed 's/"read2_mean_length"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > reverse_read_length_after.tsv
+# Read count after filtering
+grep "total_reads" *.json -m 2 -H | awk 'NR % 2 == 0' | sed 's/"total_reads"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > reads_after.tsv
+# Basepairs after filtering
+grep "total_bases" *.json -m 2 -H | awk 'NR % 2 == 0' | sed 's/"total_bases"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > bp_after.tsv
+# GC content after filtering
+grep "gc_content" *.json -m 2 -H | awk 'NR % 2 == 0' | sed 's/"gc_content"://g' | sed "s/,//g" | sed "s/.json://g" | sed "s/\t\t//g" > gc_after.tsv
+# Combine tables
+paste forward_read_length_before.tsv reverse_read_length_before.tsv reads_before.tsv bp_before.tsv gc_before.tsv forward_read_length_after.tsv reverse_read_length_after.tsv reads_after.tsv bp_after.tsv gc_after.tsv > sequences_stats.tsv
+# Extract interesting columns
+sed -r 's/:/\t/g' sequences_stats.tsv | awk -F'\t' '{print $1"\t"$2"\t"$4"\t"$6"\t"$8"\t"$10"\t"$12"\t"$14"\t"$16"\t"$18"\t"$20 }' > sequences_stats_final.tsv
+# Add headers
+sed -i '1i#Sample\t#Forward read length (before QF)\t#Reverse read length (before QF)\t#Read count (before QF)\t#Base pairs (before QF)\t#GC content (before QF)\t#Forward read length (after QF)\t#Reverse read length (after QF)\t#Read count (after QF)\t#Base pairs (after QF)\t#GC content (after QF)' sequences_stats_final.tsv
+# Remove temporary files
+rm bp_after.tsv bp_before.tsv forward_read_length_after.tsv forward_read_length_before.tsv gc_after.tsv gc_before.tsv reads_after.tsv reads_before.tsv reverse_read_length_after.tsv reverse_read_length_before.tsv sequences_stats.tsv -f
+
+mv sequences_stats_final.tsv ../fastp.tsv -f
+cd ..
+
+# For cutadapt
+cd 02_cutadapt
+
+grep "Read 1 with adapter:" *.log -m 1 -H | sed 's/Read 1 with adapter://g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > forward_read_adapter.tsv
+grep "Read 2 with adapter:" *.log -m 1 -H | sed 's/Read 2 with adapter://g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > reverse_read_adapter.tsv
+grep "Total basepairs processed:" *.log -A 2 -H | grep "Read 1" | sed 's/-.*Read 1//g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > basepairs_processed_R1.tsv
+grep "Total basepairs processed:" *.log -A 2 -H | grep "Read 2" | sed 's/-.*Read 2//g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > basepairs_processed_R2.tsv
+grep "Total written (filtered):" *.log -A 2 -H | grep "Read 1" | sed 's/-.*Read 1//g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > basepairs_written_R1.tsv
+grep "Total written (filtered):" *.log -A 2 -H | grep "Read 2" | sed 's/-.*Read 2//g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > basepairs_written_R2.tsv
+grep "Total read pairs processed:" *.log -m 1 -H | sed 's/Total read pairs processed://g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > pairs_processed.tsv
+grep "Pairs written (passing filters):" *.log -m 1 -H | sed 's/Pairs written (passing filters)://g ; s/  //g' |  sed "s/,//g" | sed "s/_cutadapt.log//g" > pairs_written.tsv
+paste pairs_processed.tsv pairs_written.tsv basepairs_processed_R1.tsv basepairs_processed_R2.tsv basepairs_written_R1.tsv basepairs_written_R2.tsv forward_read_adapter.tsv reverse_read_adapter.tsv > sequences_stats_cutadapt.tsv
+# Extract interesting columns
+sed -r 's/:/\t/g' sequences_stats_cutadapt.tsv | awk -F'\t' '{print $1"\t"$2"\t"$4"\t"$6"\t"$8"\t"$10"\t"$12"\t"$14"\t"$16 }' > sequences_stats_final.tsv
+# Add headers
+sed -i '1i#Sample\t#pairs_processed\t#pairs_written\t#basepairs_processed_R1\t#basepairs_processed_R2\t#basepairs_written_R1\t#basepairs_written_R2\t#forward_read_adapter\t#reverse_read_adapter' sequences_stats_final.tsv
+# Cleanup
+rm pairs_processed.tsv pairs_written.tsv basepairs_processed_R*.tsv basepairs_written_R*.tsv forward_read_adapter.tsv reverse_read_adapter.tsv sequences_stats_cutadapt.tsv -f
+
+mv sequences_stats_final.tsv ../cutadapt.tsv -f
+cd ..
+
+# For bowtie2
+cd 03_bowtie2
+grep "overall alignment rate" *.log  -H | sed "s/ overall alignment rate//g ; s/_bowtie2.log:/\t/g" | sed '1i#Sample\t#%phiX' > ../bowtie2.tsv
+cd ..
+
+# Final sequence number and base pairs
+for i in *_R1.fastq.gz; do no_ext=${i%\_R1.fastq.gz}; echo -e "$no_ext\t$(zcat "$no_ext"_R1.fastq.gz "$no_ext"_R2.fastq.gz | awk 'NR%4==2{c++; l+=length($0)} END{ print c "\t" l }')" >> final_stats.tsv; done
+sed -i '1i#Sample\t#Final_number_sequences\t#Final_bp' final_stats.tsv
+
+# Use R to combine tables
+Rscript $(which stats_wrapper_qf.R)
+
+# Display sequence statistics
+cat ngs4_qf_report.tsv | sed 's/\t/|/g' | column -t -s $"|"
+
+
+
+# Cleanup
+mkdir 04_summaries
+mv *.tsv 04_summaries
+
+cd ..
+rm fastqlist -f
+rm *.fastq.gz -f
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD metagenome pipeline - Quality filter finished!"
+echo -e "\033[0;37m"
+
+
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_qf_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_qf_* $output_folder

@@ -1,0 +1,99 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Download NanoPhase databases
+# Dominik Schneider, 2023-04-12
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_download_nanophase -i <destination_folder_for_ngs4ecoprod>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Installation folder of NanoPhase databases"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts i:":h" flag
+do
+    case "${flag}" in
+        i) install_dir=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+IF="$install_dir/gtdbtk"
+if [ -d "$IF" ]; then
+  echo -e "\033[1;31mError database folder $IF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+IF="$install_dir/plsdb"
+if [ -d "$IF" ]; then
+  echo -e "\033[1;31mError database folder $IF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+
+if [ -d "$IF" ]; then
+  mkdir $install_dir
+fi
+
+# Main script
+
+echo
+echo -e "\033[1;31m-----------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD NanoPhase database download"
+echo -e "\033[1;31m-----------------------------------------"
+echo -e "\e[37m"
+echo "Installation folder:             $install_dir"
+
+
+
+# Download and extract silva database
+echo
+echo -e "\033[1;33mDownloading & installing GTDBtk and PLSDB..."
+echo -e "\e[37m"
+
+# Modified from NanoPhase
+## download database: May skip if you have done before or GTDB and PLSDB have been downloaded in the server
+#wget -q --show-progress -c https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/gtdbtk_v2_data.tar.gz --directory-prefix $install_dir/gtdbtk && tar -xzf $install_dir/gtdbtk/gtdbtk_v2_data.tar.gz -C install_dir/gtdbtk && rm -f $install_dir/gtdbtk/gtdbtk_v2_data.tar.gz
+#wget -q --show-progress -c https://ccb-microbe.cs.uni-saarland.de/plsdb/plasmids/download/plsdb.fna.bz2 --directory-prefix $install_dir/plsdb && bunzip2 $install_dir/plsdb/plsdb.fna.bz2
+# need alternative download source
+
+## setting location
+echo "export GTDBTK_DATA_PATH=$install_dir/gtdbtk/release207_v2" > $(dirname $(dirname `which nanophase`))/etc/conda/activate.d/np_db.sh
+echo "export PLSDB_PATH=$install_dir/plsdb" >> $(dirname $(dirname `which nanophase`))/etc/conda/activate.d/np_db.sh
+conda deactivate && activate_ngs4ecoprod ## require re-activate ngs4ecoprod
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD database download & installation finished"
+echo -e "\033[0;37m"

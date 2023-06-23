@@ -1,0 +1,414 @@
+#!/bin/bash
+# NGS-4-ECOPROD - 18S rRNA gene pipeline
+# Dominik Schneider, 2023-06-12
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Set defaults
+export processes=1
+export threads=1
+export min_length=200
+export min_quality=20
+export forward_primer=CCAGCASCYGCGGTAATTCC
+export reverse_primer=TYRATCAAGAACGAAAGT
+export amplicon_length=350
+export minsize=8
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_18S -i <folder_with_raw_amplicon_data> -o <output_folder> -d <silva_db_folder> -p <processes> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_18S -i ~/ngs4ecoprod/ngs4ecoprod/example_data/18S -o ~/ngs4_18S -d ~/ngs4ecoprod/ngs4ecoprod/db/silva -p 3 -t 8"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Input folder containing paired-end fastq.gz"
+   echo "                Note: files must be named according to the following scheme"
+   echo "                Sample_name_R1.fastq.gz"
+   echo "                Sample_name_R2.fastq.gz"
+   echo "         -o     Output folder"
+   echo "         -d     Path to silva database"
+   echo "         -l     Optional: Minimum length of forward and reverse sequence in bp [default: $min_length]"
+   echo "         -q     Optional: Minimum phred score [default: $min_quality]"
+   echo "         -p     Number of processes [default: $processes]"
+   echo "         -t     Number of CPU threads per process [default: $threads]"
+   echo "         -f     Optional: Forward primer [default: $forward_primer]"
+   echo "         -r     Optional: Reverse primer [default: $reverse_primer]"
+   echo "                Note: Use the reverse complement sequence of your 18S rRNA gene reverse primer"
+   echo "         -a     Optional: Minimum length of amplicon [default: $amplicon_length]"
+   echo "         -u     Optional: minsize parameter of UNOISE [default: $minsize]"
+   echo "                Note: Only change under special circumstances, i.e., very low sample number"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts p:t:i:o:d:l:f:r:a:q:u:":h" flag
+do
+    case "${flag}" in
+        p) processes=${OPTARG};;
+        t) threads=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        o) output_folder=${OPTARG};;
+        d) db_path=${OPTARG};;
+        l) min_length=${OPTARG};;
+        q) min_quality=${OPTARG};;
+        f) forward_primer=${OPTARG};;
+        r) reverse_primer=${OPTARG};;
+        a) amplicon_length=${OPTARG};;
+        u) minsize=${OPTARG};;
+        h) Help;exit;;
+       \?) -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_18S -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+if [[ -z "$output_folder" ]]; then
+    echo -e "\033[1;31mError: output folder path -o not set! ngs4_18S -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+if [[ -z "$db_path" ]]; then
+    echo -e "\033[1;31mError: database path -d not set! ngs4_18S -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+# Check folder and return error
+DB="$db_path"
+if [ ! -d "$DB" ]; then
+  echo -e "\033[1;31mError silva database not found: $DB not found. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+IF="$input_folder"
+if [ ! -d "$IF" ]; then
+  echo -e "\033[1;31mError input folder $IF does not exist. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+OF="$output_folder"
+if [ -d "$OF" ]; then
+  echo -e "\033[1;31mError output folder $OF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m----------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD marker gene pipeline"
+echo -e "\033[1;31m----------------------------------"
+echo -e "\e[37m"
+echo "Number of processes:             $processes"
+echo "Number of threads per process:   $threads"
+echo "Number of threads total:         $(($processes*$threads))"
+echo "Database folder:                 $db_path"
+echo "Input folder:                    $input_folder"
+echo "Output folder:                   $output_folder"
+echo "Minimum sequence length:         $min_length"
+echo "Minimum phred quality:           $min_quality"
+echo "Forward primer:                  $forward_primer"
+echo "Reverse primer:                  $reverse_primer"
+echo "Minimum amplicon length:         $amplicon_length"
+echo "UNOISE minsize:                  $minsize"
+echo
+echo "Software:"
+echo "$(parallel --version | head -n 1)"
+fastp --version
+echo "cutadapt $(cutadapt --version)"
+vsearch --v >&- 2> temp_file && grep "^vsearch" temp_file | sed "s|_linux.*||g ; s| v| |g" && rm -f temp_file
+blastn -version 2>&1 | head -n 1 | sed "s|:||g"
+echo "mafft $(grep "^version" $(which mafft) | sed 's|version="v||g ; s| .*||g')"
+fasttree -expert 2> temp_file && head -n 1 temp_file | sed "s|.*FastTree|FastTree|g ; s| Double.*||g" && rm -f temp_file
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+Rscript $(which version_info.R) | grep "ampvis2\|stringr" | sed "s| *|| ; s| .* | |g"
+
+
+
+# Create sample list
+
+mkdir $output_folder
+ln -s $input_folder/*.fastq.gz $output_folder
+cd $output_folder
+ls -1 *_R1.fastq.gz | sed "s/_R1.fastq.gz//g" > fastqlist
+
+echo
+echo "$(wc -l < fastqlist) samples detected"
+
+
+# Run fastp on data
+echo
+echo -e "\033[1;33mRunning quality filter (fastp)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a fastqlist 'echo "Finished fastp on sample --> {}"; fastp -i {}_R1.fastq.gz -I {}_R2.fastq.gz -o QF~{}_R1.fastq.gz -O QF~{}_R2.fastq.gz -h {}.html -j {}.json --thread '$threads' --average_qual '$min_quality' --correction --qualified_quality_phred '$min_quality' --cut_mean_quality '$min_quality' --cut_front --cut_tail --cut_window_size 4 --n_base_limit 0 --length_required '$min_length' --compression 6 --detect_adapter_for_pe >&- 2>&-'
+
+
+
+# Create folder structure
+
+mkdir 01_quality_filtered_data
+mkdir 01_quality_filtered_data/01_fastp
+mv QF~* 01_quality_filtered_data
+rm *.fastq.gz -f
+
+mv *.html 01_quality_filtered_data/01_fastp
+mv *.json 01_quality_filtered_data/01_fastp
+
+cd 01_quality_filtered_data
+rename "s|QF~||g" *.fastq.gz
+
+mkdir 02_cutadapt
+
+
+
+# Remove forward and reverse primers with cutadapt
+
+echo
+echo -e "\033[1;33mRunning primer removal (cutadapt)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a ../fastqlist 'echo "Finished cutadapt on sample --> {}";cutadapt -O 3 -m '$min_length' --trim-n --times 2 --match-read-wildcards -j '$threads' -g '$forward_primer' -a '$reverse_primer' -o cut~{}_R1.fastq.gz -p cut~{}_R2.fastq.gz {}_R1.fastq.gz {}_R2.fastq.gz > 02_cutadapt/{}_cutadapt.log'
+
+rename "s|cut~||g" *.fastq.gz -f
+
+
+
+# Merge forward and reverse sequences
+
+mkdir ../02_merge
+
+echo
+echo -e "\033[1;33mRunning merging paired-end reads (vsearch --> fastq_mergepairs)"
+echo -e "\e[37m"
+
+parallel --load 80% --noswap -j $processes -a ../fastqlist 'echo -n "Finished read merging on sample --> {}"; vsearch --fastq_mergepairs {}_R1.fastq.gz --reverse {}_R2.fastq.gz --fastq_minovlen 30 --fastq_maxdiffs 10 -threads '$threads' --fastqout ../02_merge/{}.fastq 1>&- 2> ../02_merge/{}_fastq_mergepairs.log; echo "$(grep 'Merged' ../02_merge/{}_fastq_mergepairs.log | sed "s|.*Merged (|, | ; s|)| of paired reads were merged|g")"'
+
+
+
+# Convert fastq to fasta
+cd ../02_merge
+for fastq_file in *.fastq; do no_ext=${fastq_file%\.fastq}; awk '{if(NR%4==1) {printf(">%s\n",substr($0,2));} else if(NR%4==2) print;}' "$fastq_file" > "$no_ext".fasta; done
+rm *.fastq -f
+
+
+
+# Re-label sequences
+for fasta_file in *.fasta; do no_ext=${fasta_file%\.fasta}; sed "s/^>.*/>${no_ext}/g" "$fasta_file" > "$no_ext"_renamed.fasta && mv "$no_ext"_renamed.fasta "$fasta_file"; done
+mkdir ../03_derep
+cat *.fasta > ../03_derep/all_sequences.fasta
+
+
+
+# Size sort & filter & dereplicate sequences
+
+echo
+echo -e "\033[1;33mDereplicating amplicons (vsearch --> sortbylength & derep_fulllength)"
+echo -e "\e[37m"
+
+cd ../03_derep
+vsearch --sortbylength all_sequences.fasta --output 1_seqs_length_sorted.fasta --minseqlength $amplicon_length --log 1_size_filter.log 2>&-
+echo "Sort and size filter    --> $(grep " nt " 1_size_filter.log | head -n 1 | sed "s|.* in ||g ; s|seqs|sequences|g")"
+
+vsearch --derep_fulllength 1_seqs_length_sorted.fasta --minuniquesize 2 --sizeout --uc 2_dereplication.txt --output 2_dereplicated_sequences.fasta --log 2_dereplication.log 2>&-
+echo "Dereplication           --> $(grep " uniques " 2_dereplication.log | head -n 1 | sed "s|.* in ||g ; s| uniques | unique sequences |g")"
+
+echo
+echo "Size sorting and dereplication finished"
+
+
+
+# Denoise sequences
+
+echo
+echo -e "\033[1;33mDenoising amplicons (vsearch --> cluster_unoise)"
+echo -e "\e[37m"
+
+mkdir ../04_denoise
+cd ../04_denoise
+vsearch --threads $(($processes*$threads)) --cluster_unoise ../03_derep/2_dereplicated_sequences.fasta --uc 1_unoise_out.txt --centroids 1_denoised.fasta --minsize $minsize --log 1_unoise.log 2>&-
+echo "Denoising               --> $(grep "Clusters" 1_unoise.log | head -n 1 | sed "s|Clusters: ||g ; s|Size.*|ASVs|g") after denoising"
+
+echo
+echo "Denoising finished"
+
+
+
+# Chimera removal
+
+echo
+echo -e "\033[1;33mChimera removal (vsearch --> uchime3_denovo & uchime_ref)"
+echo -e "\e[37m"
+
+mkdir ../05_chimera_removal
+cd ../05_chimera_removal
+
+vsearch --uchime3_denovo ../04_denoise/1_denoised.fasta --nonchimeras 1_chim_denovo.fasta --log 1_chim_denovo.log 2>&-
+echo "De novo chimera removal            --> $(grep "^Found " 1_chim_denovo.log | head -n 1 | sed "s|chimeras,.*|chimeras|g")"
+echo "                                       $(grep "^and " 1_chim_denovo.log | head -n 1 | sed "s|orderline sequences .*|orderline sequences|g")"
+
+vsearch --uchime_ref 1_chim_denovo.fasta --threads $(($processes*$threads)) --db $db_path/SILVA_138.1_SSURef_tax_silva_trunc.fasta --nonchimeras 2_chim_ref.fasta --log 2_chim_ref.log 2>&-
+echo "Reference based chimera removal    --> $(grep "Found " 2_chim_ref.log | head -n 1 | sed "s|chimeras,.*|chimeras|g")"
+echo "                                       $(grep "^and " 2_chim_ref.log | head -n 1 | sed "s|orderline sequences .*|orderline sequences|g")"
+
+# Rename ASV sequences
+sed "s|^>.*|>|g" 2_chim_ref.fasta | awk '{for(x=1;x<=NF;x++)if($x~/^>/){sub(/>/,sprintf(">ASV_%06d",++i))}}1' > ../ASV_sequences.fasta
+# Create one-line FASTA
+awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);}  END {printf("\n");}' < ../ASV_sequences.fasta | tail -n +2 > temp && mv temp ../ASV_sequences.fasta
+echo "Final ASV count:                   --> $(grep -c "^>" ../ASV_sequences.fasta) ASVs"
+
+echo
+echo "Chimera removal finished"
+
+
+
+# Mapping reads to ASVs
+
+echo
+echo -e "\033[1;33mRead mapping to ASVs (vsearch --> usearch_global)"
+echo -e "\e[37m"
+
+mkdir ../06_mapping
+cd ../06_mapping
+
+vsearch --threads $(($processes*$threads)) --usearch_global ../03_derep/all_sequences.fasta --db ../ASV_sequences.fasta -id 0.97 --otutabout pre_otu_table.tsv --log 1_ASV_mapping.log 2>&-
+echo "Mapped $(grep "Matching unique query sequences" 1_ASV_mapping.log | head -n 1 | sed "s|Matching unique query sequences: ||g") amplicon sequences to ASVs"
+
+echo
+echo "Read mapping finished"
+
+
+
+# Assigning taxonomy to ASVs by blastn
+
+echo
+echo -e "\033[1;33mPerforming blastn (megablast) vs silva database 138.1"
+echo -e "\e[37m"
+
+mkdir ../07_blastn
+cd ../07_blastn
+
+blastn -task megablast -db $db_path/SILVA_138.1_SSURef_tax_silva_trunc.fasta -query ../ASV_sequences.fasta -out 1_ASV.blastn -perc_identity 70 -outfmt '7 qseqid sseqid pident qcovs mismatch gapopen qstart qend sstart send evalue bitscore' -max_target_seqs 50 -num_threads $(($processes*$threads))
+
+# Add tax info
+awk 'BEGIN {OFS=FS="\t"} NR==FNR{map[$1]=$2;next} {for(i=1;i<=NF;i++)$i=($i in map)?map[$i]:$i}1' $db_path/SILVA_138.1_SSURef_tax_silva_trunc.taxonomy 1_ASV.blastn > 2_ASV_lineage.blastn
+
+# Reformat table
+sed ':a;N;$!ba; s|\n# Database: '$db_path'/SILVA_138.1_SSURef_tax_silva_trunc.fasta\n# 0 hits found|\tNo blast hit\tNo blast hit\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA|g' 2_ASV_lineage.blastn | sed -n '/No blast hit/{s|^# Query: ||};p' | sed '/^#/d' | awk -F'\t' '!seen[$1]++' | sed 's|~~| |g' | sed 's|~|\t|g' > 3_ASV_lineage.tsv
+
+paste --delimiter='\t' <(cut -f1 3_ASV_lineage.tsv) <(cut -f3 3_ASV_lineage.tsv) <(cut -f2,4,5,12 3_ASV_lineage.tsv --output-delimiter='~') > temp_file
+paste --delimiter='\t' <(cut -f1 temp_file) <(cut -f2,3 temp_file --output-delimiter='~') | sed 's|No blast hit~No blast hit|No blast hit|g' > 4_ASV_tax_final.tsv
+rm -f temp_file
+
+echo "blastn finished"
+
+
+
+# Create final ASV table
+
+echo
+echo -e "\033[1;33mCreate final ASV table"
+echo -e "\e[37m"
+
+mkdir ../08_ASV_table
+cd ../08_ASV_table
+
+paste <(cat ../06_mapping/pre_otu_table.tsv) <(awk 'BEGIN {OFS=FS="\t"} NR==FNR{map[$1]=$2;next} {for(i=1;i<=NF;i++)$i=($i in map)?map[$i]:$i}1' ../07_blastn/4_ASV_tax_final.tsv <(cut -f1 ../06_mapping/pre_otu_table.tsv) | sed "s|#OTU ID|taxonomy|g") > 1_ASV_table.tsv
+
+# Apply Yarza et al. filter
+Rscript $(which 18S_ASV_table_finalize.R) 2>&- | tail -n 14 | sed "s|OTU|ASV|g" | head -n 11
+
+cp $(which markergene_18S.R) ../
+
+echo
+echo "ASV table finished"
+
+
+
+# Create phylogenetic tree of ASVs
+
+echo
+echo -e "\033[1;33mCreate phylogenetic tree of ASVs (mafft & FastTree)"
+echo -e "\e[37m"
+
+mkdir ../09_phylo_tree
+cd ../09_phylo_tree
+
+# Align ASVs
+mafft --thread $(($processes*$threads)) --auto --quiet --maxiterate 1000 ../ASV_sequences.fasta > 1_mafft_ASV_alignment.aln
+
+# Create pyhlogenetic tree
+fasttree -nt -gtr -gamma -quiet -log 2_fasttree.log 1_mafft_ASV_alignment.aln > ../ASV.tre
+
+echo "ASV tree finished"
+
+rm -f ../fastqlist
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD marker gene pipeline finished!"
+echo -e "\033[0;37m"
+
+echo -e "\033[0;37mYou can analyze your results with:"
+echo -e "\033[1;32mcd $output_folder && rstudio markergene_18S.R"
+echo -e "\033[0;37m"
+
+
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_18S_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_18S_* $output_folder

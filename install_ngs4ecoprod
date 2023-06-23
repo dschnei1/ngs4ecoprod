@@ -1,0 +1,197 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Installation script
+# Dominik Schneider, 2023-02-13
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37minstall_ngs4ecoprod -i <destination_folder_for_ngs4ecoprod>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37minstall_ngs4ecoprod -i ~/ngs4ecoprod"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Installation folder"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts i:":h" flag
+do
+    case "${flag}" in
+        i) install_dir=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+IF="$install_dir"
+if [ -d "$IF" ]; then
+  echo -e "\033[1;31mError input folder $IF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+
+
+# Start log file
+#{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m--------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD Installation"
+echo -e "\033[1;31m--------------------------"
+echo -e "\e[37m"
+echo "Installation folder:             $install_dir"
+
+
+
+# 1. Install latest miniconda where you like (in this case we use /home/user/ngs4ecoprod)
+# Download latest miniconda
+echo
+echo -e "\033[1;33mDownloading & installing latest miniconda..."
+echo -e "\e[37m"
+wget -q --show-progress https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+#wget -c --progress=bar:force:noscroll https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# Install miniconda in your home directory
+bash Miniconda3-latest-Linux-x86_64.sh -b -p $install_dir
+# Remove installer
+rm Miniconda3-latest-Linux-x86_64.sh* -f
+
+
+
+# 2. Install mamba for speed and convenience
+# Install mamba
+echo
+echo -e "\033[1;33mInstalling mamba..."
+echo -e "\e[37m"
+$install_dir/bin/conda install mamba -n base -c conda-forge -y 
+
+
+
+# 3. Clone github NGS-4-ECOPROD & BLCA repository into conda
+echo
+echo -e "\033[1;33mDownloading ngs4ecoprod..."
+echo -e "\e[37m"
+git clone --recursive https://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@github.com/dschnei1/ngs4ecoprod.git $install_dir/ngs4ecoprod
+
+# BLCA
+echo
+echo -e "\033[1;33mDownloading BLCA..."
+echo -e "\e[37m"
+git clone --recursive https://github.com/qunfengdong/BLCA $install_dir/BLCA
+
+# NanoPhase & metaWRAP
+echo
+echo -e "\033[1;33mDownloading NanoPhase..."
+echo -e "\e[37m"
+git clone --recursive https://github.com/Hydro3639/NanoPhase $install_dir/NanoPhase
+echo
+echo -e "\033[1;33mInstalling metaWRAP..."
+echo -e "\e[37m"
+$install_dir/bin/mamba create -y -n metawrap-env -c ursky metawrap-mg=1.3.2
+
+
+
+# 4. Create conda environment with prerequisites using ngs-4-ecoprod.yml file:
+echo
+echo -e "\033[1;33mInstalling ngs4ecoprod..."
+echo -e "\e[37m"
+$install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/ngs4ecoprod/ngs-4-ecoprod.yml
+
+# Install GTDBtk
+echo
+echo -e "\033[1;33mInstalling GTDBtk..."
+echo -e "\e[37m"
+wget -q --show-progress https://anaconda.org/bioconda/gtdbtk/2.2.6/download/noarch/gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2
+$install_dir/bin/mamba install gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2 -n ngs-4-ecoprod
+rm -f gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2
+
+
+
+# 5. Link scripts and allow execution
+echo
+echo -e "\033[1;33mSetting up ngs4ecoprod..."
+echo -e "\e[37m"
+ln -s $install_dir/ngs4ecoprod/scripts/* $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/BLCA/*.py $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/NanoPhase/bin/* $install_dir/envs/ngs-4-ecoprod/bin/
+# Ensure all scripts are executable
+chmod +x $install_dir/ngs4ecoprod/scripts/*
+chmod +x $install_dir/BLCA/*.py
+chmod +x $install_dir/NanoPhase/bin/*
+# Modify BLCA to use python of ngs4ecopord environment and set percent identity of blast to 70% since the scripts --iset does not work/apply
+#sed -i.bak "s|^#!/usr/bin/env python|#!$install_dir/envs/ngs-4-ecoprod/bin/python|g ; s|str(eset), '-perc_identity', '90'|str(eset), '-perc_identity', '70'|g" $install_dir/BLCA/*.py
+sed -i.bak "s|^#!/usr/bin/env python|#!$install_dir/envs/ngs-4-ecoprod/bin/python|g" $install_dir/BLCA/*.py
+# Modify NanoPhase for GTDBtk v2.2.6 and fix SemiBin
+sed -i.bak "s|gtdbtk classify_wf |gtdbtk classify_wf --skip_ani_screen |g ; s|semibin/semibin-output/output_bins\`|semibin/semibin-output/output_bins/*\`|g" $install_dir/NanoPhase/bin/*
+sed -i  "s|ln -s|#ln -s|g ; s|02-LongBins/INITIAL_BINNING/semibin/semibin-bins |02-LongBins/INITIAL_BINNING/semibin/semibin-output/output_bins |g ; s|02-LongBins/INITIAL_BINNING/semibin/semibin-bins\.|02-LongBins/INITIAL_BINNING/semibin/semibin-output/output_bins\.|g" $install_dir/NanoPhase/bin/nanophase.meta
+sed -i "s*03-Polishing/Final-bins/tmp.taxa | awk '{print*03-Polishing/Final-bins/tmp.taxa | sed 's| |_|g' | awk '{print*g" $install_dir/NanoPhase/bin/nanophase.meta
+#sed -i.bak "s|gtdbtk classify_wf |gtdbtk classify_wf --skip_ani_screen |g ; s|#mkdir -p |mkdir -p |g ; s|semibin/semibin-output/output_bins\`|semibin/semibin-output/output_bins/*\`|g" $install_dir/NanoPhase/bin/*
+#sed -i  "s|ln -s|cp|g" $install_dir/NanoPhase/bin/nanophase.meta
+# Link metaWRAP
+ln -s $install_dir/envs/metawrap-env/bin/config-metawrap $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/envs/metawrap-env/bin/metawrap* $install_dir/envs/ngs-4-ecoprod/bin/
+# Modify metaWRAP scripts to use correct python version
+sed -i "s|#\!/usr/bin/env python2.7|#\!$install_dir/envs/metawrap-env/bin/python2.7|g" $install_dir/envs/metawrap-env/bin/metawrap-*/*.py
+
+echo "Done."
+
+
+# 6. Create alias for the conda environment for easy access (this example is for bash shell, please change .bashrc to according to your shell, e.g., .zshrc etc.)
+echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> ~/.bashrc
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD installation finished"
+echo -e "\033[0;37m"
+echo -e "\033[0;37mDo once: \033[1;32mrestart shell \033[0;37mor type \033[1;32msource ~/.bashrc"
+echo
+echo -e "\033[0;37mYou can now activate the conda environment with:"
+echo -e "\033[1;32mactivate_ngs4ecoprod"
+echo -e "\033[0;37m"
+
+
+
+# End log file
+#} 2>&1 | tee -a ~/install_ngs4ecoprod_$(date +"%Y-%m-%d_%T").log

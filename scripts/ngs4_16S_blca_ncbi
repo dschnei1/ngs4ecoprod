@@ -1,0 +1,179 @@
+#!/bin/bash
+# NGS-4-ECOPROD - 16S rRNA gene pipeline - add BLCA table based on NCBI 16S
+# Dominik Schneider, 2023-03-31
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_16S_blca_ncbi -i <folder_with_amplicon_data> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_16S_blca_ncbi -i ~/ngs4_16S -t 24"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Input folder containing 16S rRNA gene data previously analyzed with ngs4_16S"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Set defaults
+export threads=1
+
+
+
+# Define options
+
+while getopts t:i:":h" flag
+do
+    case "${flag}" in
+        t) threads=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_16S_blca_ncbi -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+# Check folder and return error
+IF="$input_folder"
+if [ ! -d "$IF" ]; then
+  echo -e "\033[1;31mError input folder $IF does not exist. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+
+
+if [ -d "$IF/10_blca_ncbi" ]; then
+  echo -e "\033[1;31mError output folder $IF/10_blca_ncbi already exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m----------------------------------------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD BLCA annotation based on NCBIs 16S database for ngs4_16S"
+echo -e "\033[1;31m----------------------------------------------------------------------"
+echo -e "\e[37m"
+echo "Number of threads:               $threads"
+echo "Input folder:                    $input_folder"
+echo "Output folder:                   $input_folder/10_blca_ncbi"
+echo "Database folder:                 $input_folder/10_blca_ncbi"
+echo
+echo "Software:"
+blastn -version > temp_file && grep "blastn" temp_file | sed "s|:||g ; s| v| |g" && rm -f temp_file
+echo "clustalo $(clustalo --version)"
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+Rscript $(which version_info.R) | grep "ampvis2\|stringr" | sed "s| *|| ; s| .* | |g"
+#muscle -version | sed "s/v//g ; s/ by.*//g"
+
+
+
+# Download most recent database from NCBI
+echo
+echo -e "\033[1;33mDownloading current version of NCBIs 16S rRNA gene database & compile taxonomy database for BLCA"
+echo -e "\e[37m"
+
+mkdir $input_folder/10_blca_ncbi
+
+1.subset_db_acc.py --dir $input_folder/10_blca_ncbi > $input_folder/10_blca_ncbi/1_DB_download.log 2>&1
+
+cd $input_folder/10_blca_ncbi
+
+rm taxdmp.zip *.dmp taxdb* gc.prt readme.txt 16S_ribosomal_RNA.tar.gz -f
+
+echo "Download & compilation finished"
+
+
+
+# Run BLCA on data
+echo
+echo -e "\033[1;33mRunning bayesian lowest common ancestor (BLCA) with NCBI 16S rRNA database"
+echo -e "\e[37m"
+
+ln -s ../ASV_sequences.fasta
+
+2.blca_main.py -i ASV_sequences.fasta -r 16S_ribosomal_RNA.ACC.taxonomy -q 16S_ribosomal_RNA -o 1_blca.out -p $threads 1> 2_BLCA.log
+
+echo "BLCA finished"
+
+rm -f ASV_sequences.fasta
+
+# Create final ASV table
+
+echo
+echo -e "\033[1;33mCreate ASV table with BLCA annotation"
+echo -e "\e[37m"
+
+paste <(cat ../06_mapping/pre_otu_table.tsv) <(awk 'BEGIN {OFS=FS="\t"} NR==FNR{map[$1]=$2;next} {for(i=1;i<=NF;i++)$i=($i in map)?map[$i]:$i}1' 1_blca.out  <(cut -f1 ../06_mapping/pre_otu_table.tsv | sed "s|#OTU ID|taxonomy|g")) > 2_ASV_table_BLCA_raw.tsv
+
+# Filter results and remove annotation for confidence <80
+Rscript $(which ASV_table_blca_ncbi_finalize.R) 2>&- | tail -n 14 | sed "s|OTU|ASV|g" | head -n 11
+
+
+
+echo
+echo "ASV with NCBI BLCA annotation table finished"
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD NCBI BLCA annotation for ngs4_16S finished!"
+echo -e "\033[0;37m"
+
+echo -e "\033[0;37mYou can analyze your results with:"
+echo -e "\033[1;32mcd $input_folder && rstudio markergene_16S.R"
+echo -e "\033[0;37mRemember to change the ASV table within the script"
+echo -e "\033[0;37m"
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_16S_blca_ncbi_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_16S_blca_ncbi_* $input_folder
