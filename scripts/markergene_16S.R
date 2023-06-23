@@ -18,7 +18,7 @@ rm(list=ls())
 # Read ASV table
 myotutable = read.table("ASV_table.tsv", sep = "\t", header=T, check.names=F, comment.char="", skip = 0, quote = "")
 # or if you used ngs4_16S_blca/ngs4_16S_blca_ncbi
-#myotutable = read.table("ASV_table_BLCA_silva.tsv", sep = "\t", header=T, check.names=F, comment.char="", skip = 0, quote = "")
+#myotutable = read.table("ASV_table_BLCA.tsv", sep = "\t", header=T, check.names=F, comment.char="", skip = 0, quote = "")
 #myotutable = read.table("ASV_table_BLCA_ncbi.tsv", sep = "\t", header=T, check.names=F, comment.char="", skip = 0, quote = "")
 
 # Fill empty cells of ASV table

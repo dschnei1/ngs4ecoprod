@@ -3,7 +3,7 @@ NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to advancing me
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenome sequencing of paired-end sequences, metagenome sequences from nanopore etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
 
-The pipeline was tested under Linux (Ubuntu 12.04 LTS, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can by removed at any time (also I hope you like it enough to not get rid of it).
+The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can by removed at any time (also I hope you like it enough to not get rid of it).
 
 Pros and Cons?
 
@@ -118,7 +118,8 @@ So far the repository contains the following scripts:
 1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea)](#1-amplicon-analysis-pipeline-16S-bacteria-and-archaea) \
 `ngs4_16S` \
 `ngs4_16S_blca` \
-`ngs4_16S_blca_ncbi`
+`ngs4_16S_blca_ncbi` \
+`ngs4_18S` 
 
 2. [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
 `ngs4_np_qf` \

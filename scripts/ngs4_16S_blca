@@ -105,6 +105,7 @@ echo "Input folder:                    $input_folder"
 echo "Output folder:                   $input_folder/10_blca_silva"
 echo
 echo "Software:"
+echo "BLCA $(head $(which 2.blca_main.py) | grep "version" | sed 's|.* "||g ; s|"||g')"
 blastn -version > temp_file && grep "blastn" temp_file | sed "s|:||g ; s| v| |g" && rm -f temp_file
 echo "clustalo $(clustalo --version)"
 R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
@@ -122,7 +123,7 @@ cd $input_folder/10_blca_silva
 
 ln -s ../ASV_sequences.fasta
 
-2.blca_main.py -i ASV_sequences.fasta -r $db_path/SILVA_138.1_SSURef_tax_silva_trunc_BLCA.taxonomy -q $db_path/SILVA_138.1_SSURef_tax_silva_trunc.fasta -o 1_blca.out -p $threads 1> BLCA.log
+2.blca_main.py -i ASV_sequences.fasta -r $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc_BLCA.taxonomy -q $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc.fasta -o 1_blca.out -p $threads 1> BLCA.log
 
 echo "BLCA finished"
 

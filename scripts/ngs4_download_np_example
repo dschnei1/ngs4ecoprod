@@ -1,5 +1,5 @@
 #!/bin/bash
-# NGS-4-ECOPROD - Download modified silva database
+# NGS-4-ECOPROD - Download example data for Nanope
 # Dominik Schneider, 2023-06-23
 
 
@@ -10,14 +10,14 @@ Help()
 {
    echo
    echo -e "\033[1;32mSyntax:" 
-   echo -e "\033[0;37mngs4_download_silva_db -i <destination_folder_for_ngs4ecoprod>"
+   echo -e "\033[0;37mngs4_download_np_example -i <ngs4ecoprod_example_data_folder>"
    echo
    echo -e "\033[1;32mExample:"
-   echo -e "\033[0;37mngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db"
+   echo -e "\033[0;37mngs4_download_np_example -i ~/ngs4ecoprod/ngs4ecoprod/example_data"
    echo
    echo -e "\033[1;32mOptions:"
    echo -e "\033[0;37m"
-   echo "         -i     Installation folder of silva database"
+   echo "         -i     Example data folder"
    echo "         -h     Print this help"
    echo
 }
@@ -45,18 +45,16 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-IF="$install_dir/silva"
+IF="$install_dir/nanopore"
 if [ -d "$IF" ]; then
   echo -e "\033[1;31mError database folder $IF exists. Exiting..."
   echo -e "\033[0;37m"
   exit 1
 fi
 
-if [ ! -d "$IF" ]; then
-  mkdir $install_dir/silva
+if [ -d "$IF" ]; then
+  mkdir $install_dir
 fi
-
-
 
 # Main script
 
@@ -65,19 +63,28 @@ echo -e "\033[1;31m-------------------------------------"
 echo -e "\033[1;31mNGS-4-ECOPROD silva database download"
 echo -e "\033[1;31m-------------------------------------"
 echo -e "\e[37m"
-echo "Installation folder:             $install_dir/silva"
+echo "Installation folder:             $install_dir/nanopore"
 
 
 
 # Download and extract silva database
 echo
-echo -e "\033[1;33mDownloading & installing silva databse..."
+echo -e "\033[1;33mDownloading example data for ngs4_np_ scripts..."
 echo -e "\e[37m"
-wget -q --show-progress -c https://data.goettingen-research-online.de/api/access/datafile/:persistentId?persistentId=doi:10.25625/BNTAFD/54MOKY -O silva_NR99_138.1.tar.gz && tar -xzf silva_NR99_138.1.tar.gz -C $install_dir/silva && rm -f silva_NR99_138.1.tar.gz
+mkdir $install_dir/nanopore
+cd $install_dir/nanopore
+prefetch SRR17913199
+cd SRR17913199
+fasterq-dump SRR17913199.sra
+rm SRR17913199.sra -f
+pigz -9 -p 42 SRR17913199.fastq
+mv SRR17913199.fastq.gz ../
+cd ..
+rmdir SRR17913199
 
 
 
 # End script
 echo
-echo -e "\033[1;31mNGS-4-ECOPROD silva database download & installation finished"
+echo -e "\033[1;31mNGS-4-ECOPROD Nanopore example data downloaded"
 echo -e "\033[0;37m"

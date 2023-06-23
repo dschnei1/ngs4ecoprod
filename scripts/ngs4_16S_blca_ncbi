@@ -99,6 +99,7 @@ echo "Output folder:                   $input_folder/10_blca_ncbi"
 echo "Database folder:                 $input_folder/10_blca_ncbi"
 echo
 echo "Software:"
+echo "BLCA $(head $(which 2.blca_main.py) | grep "version" | sed 's|.* "||g ; s|"||g')"
 blastn -version > temp_file && grep "blastn" temp_file | sed "s|:||g ; s| v| |g" && rm -f temp_file
 echo "clustalo $(clustalo --version)"
 R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"

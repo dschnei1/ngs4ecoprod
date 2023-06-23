@@ -292,7 +292,7 @@ vsearch --uchime3_denovo ../04_denoise/1_denoised.fasta --nonchimeras 1_chim_den
 echo "De novo chimera removal            --> $(grep "^Found " 1_chim_denovo.log | head -n 1 | sed "s|chimeras,.*|chimeras|g")"
 echo "                                       $(grep "^and " 1_chim_denovo.log | head -n 1 | sed "s|orderline sequences .*|orderline sequences|g")"
 
-vsearch --uchime_ref 1_chim_denovo.fasta --threads $(($processes*$threads)) --db $db_path/SILVA_138.1_SSURef_tax_silva_trunc.fasta --nonchimeras 2_chim_ref.fasta --log 2_chim_ref.log 2>&-
+vsearch --uchime_ref 1_chim_denovo.fasta --threads $(($processes*$threads)) --db $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc.fasta --nonchimeras 2_chim_ref.fasta --log 2_chim_ref.log 2>&-
 echo "Reference based chimera removal    --> $(grep "Found " 2_chim_ref.log | head -n 1 | sed "s|chimeras,.*|chimeras|g")"
 echo "                                       $(grep "^and " 2_chim_ref.log | head -n 1 | sed "s|orderline sequences .*|orderline sequences|g")"
 
@@ -333,13 +333,13 @@ echo -e "\e[37m"
 mkdir ../07_blastn
 cd ../07_blastn
 
-blastn -task megablast -db $db_path/SILVA_138.1_SSURef_tax_silva_trunc.fasta -query ../ASV_sequences.fasta -out 1_ASV.blastn -perc_identity 70 -outfmt '7 qseqid sseqid pident qcovs mismatch gapopen qstart qend sstart send evalue bitscore' -max_target_seqs 50 -num_threads $(($processes*$threads))
+blastn -task megablast -db $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc.fasta -query ../ASV_sequences.fasta -out 1_ASV.blastn -perc_identity 70 -outfmt '7 qseqid sseqid pident qcovs mismatch gapopen qstart qend sstart send evalue bitscore' -max_target_seqs 50 -num_threads $(($processes*$threads))
 
 # Add tax info
-awk 'BEGIN {OFS=FS="\t"} NR==FNR{map[$1]=$2;next} {for(i=1;i<=NF;i++)$i=($i in map)?map[$i]:$i}1' $db_path/SILVA_138.1_SSURef_tax_silva_trunc.taxonomy 1_ASV.blastn > 2_ASV_lineage.blastn
+awk 'BEGIN {OFS=FS="\t"} NR==FNR{map[$1]=$2;next} {for(i=1;i<=NF;i++)$i=($i in map)?map[$i]:$i}1' $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc.taxonomy 1_ASV.blastn > 2_ASV_lineage.blastn
 
 # Reformat table
-sed ':a;N;$!ba; s|\n# Database: '$db_path'/SILVA_138.1_SSURef_tax_silva_trunc.fasta\n# 0 hits found|\tNo blast hit\tNo blast hit\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA|g' 2_ASV_lineage.blastn | sed -n '/No blast hit/{s|^# Query: ||};p' | sed '/^#/d' | awk -F'\t' '!seen[$1]++' | sed 's|~~| |g' | sed 's|~|\t|g' > 3_ASV_lineage.tsv
+sed ':a;N;$!ba; s|\n# Database: '$db_path'/SILVA_138.1_SSURef_NR99_tax_silva_trunc.fasta\n# 0 hits found|\tNo blast hit\tNo blast hit\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA|g' 2_ASV_lineage.blastn | sed -n '/No blast hit/{s|^# Query: ||};p' | sed '/^#/d' | awk -F'\t' '!seen[$1]++' | sed 's|~~| |g' | sed 's|~|\t|g' > 3_ASV_lineage.tsv
 
 paste --delimiter='\t' <(cut -f1 3_ASV_lineage.tsv) <(cut -f3 3_ASV_lineage.tsv) <(cut -f2,4,5,12 3_ASV_lineage.tsv --output-delimiter='~') > temp_file
 paste --delimiter='\t' <(cut -f1 temp_file) <(cut -f2,3 temp_file --output-delimiter='~') | sed 's|No blast hit~No blast hit|No blast hit|g' > 4_ASV_tax_final.tsv
