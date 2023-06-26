@@ -10,6 +10,14 @@ SECONDS=0
 
 
 
+# Set defaults
+export install_dir=~/ngs4ecoprod
+export shell=$bash
+export bash=~/.bashrc
+export zsh=~/.zshrc
+
+
+
 # Define help
 
 Help()
@@ -23,7 +31,8 @@ Help()
    echo
    echo -e "\033[1;32mOptions:"
    echo -e "\033[0;37m"
-   echo "         -i     Installation folder"
+   echo "         -i     Installation folder [default: ~/ngs4ecoprod]"
+   echo "         -s     Shell [default: bash]"
    echo "         -h     Print this help"
    echo
 }
