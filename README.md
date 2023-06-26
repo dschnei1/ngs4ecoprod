@@ -1,9 +1,9 @@
 # NGS-4-ECOPROD wrapper/pipeline collection
 NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to advancing metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with such data by automating key steps in the processing of raw sequence data and providing readily available basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
-This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
+This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenome sequencing of paired-end sequences, metagenome sequences from nanopore etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
 
-The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can by removed at any time (also I hope you like it enough to not get rid of it).
+The pipeline was tested under Linux (Ubuntu 12.04 LTS, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can by removed at any time (also I hope you like it enough to not get rid of it).
 
 Pros and Cons?
 
@@ -25,40 +25,29 @@ The current disk space requirement for the installation is approximately 23 GB, 
 
 ### User installation, local
 
+```
+# 1. Download install_ngs4ecoprod bash installation script
+curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/dummy-repo/contents/install_ngs4ecoprod
+#wget https://raw.githubusercontent.com/dschnei1/dummy-repo/main/install_ngs4ecoprod
 
-#### 1. Download install_ngs4ecoprod bash installation script
-```
-curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod && chmod +x install_ngs4ecoprod
-#wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
-```
+# 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
+bash install_ngs4ecoprod -i ~/ngs4ecoprod
 
-#### 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod and assuming you use bash shell, if you use zsh or else please replace bash with for example zsh in the next two commands)
-```
-./install_ngs4ecoprod -i ~/ngs4ecoprod -s bash
-```
-
-#### 3. Restart terminal or type
-```
+# 3. Restart terminal or type
 source ~/.bashrc
-```
 
-#### 4. Activate environment
-```
+# 4. Activate environment
 activate_ngs4ecoprod
-```
 
-#### 5. Remove installer
-```
+# 5. Remove installer
 rm -f install_ngs4ecoprod
-```
 
-```
 # 6. Install databases
 # Silva database for ngs4_16S
-ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
+ngs4_download_silva_db -i ~/ngs4ecoprod/dummy-repo/db
 
 # Databases for NanoPhase
-ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
+ngs4_download_nanophase -i ~/ngs4ecoprod/dummy-repo/db
 
 # kraken2 and kaiju databases
 #download_tax_k2k
@@ -70,8 +59,8 @@ ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 
 ```
 # 1. Download install_ngs4ecoprod bash installation script
-curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
-#wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
+curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/dummy-repo/contents/install_ngs4ecoprod
+#wget https://raw.githubusercontent.com/dschnei1/dummy-repo/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
 sudo bash install_ngs4ecoprod -i /opt/ngs4ecoprod
@@ -129,8 +118,7 @@ So far the repository contains the following scripts:
 1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea)](#1-amplicon-analysis-pipeline-16S-bacteria-and-archaea) \
 `ngs4_16S` \
 `ngs4_16S_blca` \
-`ngs4_16S_blca_ncbi` \
-`ngs4_18S` 
+`ngs4_16S_blca_ncbi`
 
 2. [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
 `ngs4_np_qf` \
@@ -172,9 +160,9 @@ Afterwards you can start the pipeline (here with example data) to process your 1
 
 ```
 ngs4_16S \
--i ~/ngs4ecoprod/ngs4ecoprod/example_data/16S \
+-i ~/ngs4ecoprod/dummy-repo/example_data/16S \
 -o ~/ngs4_16S \
--d ~/ngs4ecoprod/ngs4ecoprod/db/silva \
+-d ~/ngs4ecoprod/dummy-repo/db/silva \
 -p 3 -t 8
 ```
 
@@ -210,7 +198,7 @@ To run BLCA with SILVA on your data after `ngs4_16S` has finished, process your 
 ```
 ngs4_16S_blca \
 -i ~/ngs4_16S \
--d ~/ngs4ecoprod/ngs4ecoprod/db/silva_blca \
+-d ~/ngs4ecoprod/dummy-repo/db/silva_blca \
 -p 3 -t 8
 ```
 
@@ -263,7 +251,7 @@ Sample_2.fastq.gz
 
 #### Quality filter your reads with:
 ```
-ngs4_np_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data/nanopore -o ~/ngs4_np -p 3 -t 12
+ngs4_np_qf -i ~/ngs4ecoprod/dummy-repo/example_data/nanopore -o ~/ngs4_np -p 3 -t 12
 ```
 
 #### Options for `ngs4_np_qf`
@@ -331,7 +319,7 @@ This will perform quality filtering on your raw sequence data. In detail low qua
 NOTE: There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
 Sample1_R1.fastq.gz & Sample1_R2.fastq.gz
 ```
-ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ecoprod/ngs4ecoprod/db -p 3 -t 14
+ngs4_qf -i ~/ngs4ecoprod/dummy-repo/example_data -o ~/ngs4_test_run -d ~/ngs4ecoprod/dummy-repo/db -p 3 -t 14
 ```
 
 2. Taxonomic classification of quality filtered paired short-reads 
@@ -385,4 +373,4 @@ Dominik Schneider (dschnei1@gwdg.de)
 #
 
 # Citation
-Since this repository currently has no associated publication, please cite it via the GitHub link: https://github.com/dschnei1/ngs4ecoprod
+Since this repository has no associated publication please cite via the github link: https://github.com/dschnei1/dummy-repo

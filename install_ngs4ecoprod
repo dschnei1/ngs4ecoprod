@@ -10,11 +10,6 @@ SECONDS=0
 
 
 
-# Set defaults
-install_dir=~/ngs4ecoprod
-
-
-
 # Define help
 
 Help()
@@ -24,12 +19,11 @@ Help()
    echo -e "\033[0;37minstall_ngs4ecoprod -i <destination_folder_for_ngs4ecoprod>"
    echo
    echo -e "\033[1;32mExample:"
-   echo -e "\033[0;37minstall_ngs4ecoprod -i ~/ngs4ecoprod -s bash"
+   echo -e "\033[0;37minstall_ngs4ecoprod -i ~/ngs4ecoprod"
    echo
    echo -e "\033[1;32mOptions:"
    echo -e "\033[0;37m"
    echo "         -i     Installation folder"
-   echo "         -s     Shell type [bash, zsh]"
    echo "         -h     Print this help"
    echo
 }
@@ -38,17 +32,14 @@ Help()
 
 # Define options
 
-while getopts i:s:":h" flag
+while getopts i:":h" flag
 do
     case "${flag}" in
         i) install_dir=${OPTARG};;
-        s) user_shell=${OPTARG};;
         h) Help;exit;;
        \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
     esac
 done
-
-user_shell="~/.$(echo $user_shell)rc"
 
 
 
@@ -112,7 +103,7 @@ $install_dir/bin/conda install mamba -n base -c conda-forge -y
 echo
 echo -e "\033[1;33mDownloading ngs4ecoprod..."
 echo -e "\e[37m"
-git clone --recursive https://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@github.com/dschnei1/ngs4ecoprod.git $install_dir/ngs4ecoprod
+git clone --recursive https://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@github.com/dschnei1/dummy-repo.git $install_dir/dummy-repo
 
 # BLCA
 echo
@@ -128,7 +119,7 @@ git clone --recursive https://github.com/Hydro3639/NanoPhase $install_dir/NanoPh
 echo
 echo -e "\033[1;33mInstalling metaWRAP..."
 echo -e "\e[37m"
-$install_dir/bin/mamba create -y -n metawrap-env -c defaults -c conda-forge -c bioconda -c ursky  metawrap-mg=1.3.2
+$install_dir/bin/mamba create -y -n metawrap-env -c ursky metawrap-mg=1.3.2
 
 
 
@@ -136,7 +127,7 @@ $install_dir/bin/mamba create -y -n metawrap-env -c defaults -c conda-forge -c b
 echo
 echo -e "\033[1;33mInstalling ngs4ecoprod..."
 echo -e "\e[37m"
-$install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/ngs4ecoprod/ngs-4-ecoprod.yml
+$install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/dummy-repo/ngs-4-ecoprod.yml
 
 # Install GTDBtk
 echo
@@ -152,11 +143,11 @@ rm -f gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2
 echo
 echo -e "\033[1;33mSetting up ngs4ecoprod..."
 echo -e "\e[37m"
-ln -s $install_dir/ngs4ecoprod/scripts/* $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/dummy-repo/scripts/* $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/BLCA/*.py $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/NanoPhase/bin/* $install_dir/envs/ngs-4-ecoprod/bin/
 # Ensure all scripts are executable
-chmod +x $install_dir/ngs4ecoprod/scripts/*
+chmod +x $install_dir/dummy-repo/scripts/*
 chmod +x $install_dir/BLCA/*.py
 chmod +x $install_dir/NanoPhase/bin/*
 # Modify BLCA to use python of ngs4ecopord environment and set percent identity of blast to 70% since the scripts --iset does not work/apply
@@ -178,7 +169,7 @@ echo "Done."
 
 
 # 6. Create alias for the conda environment for easy access (this example is for bash shell, please change .bashrc to according to your shell, e.g., .zshrc etc.)
-echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> $user_shell
+echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> ~/.bashrc
 
 
 
