@@ -23,13 +23,6 @@ You can either install the pipeline as a [user](#user-installation-local) into y
 
 The current disk space requirement for the installation is approximately 23 GB, excluding the databases. However, when including the databases, the total disk space needed increases to 845 GB, with SILVA requiring an additional 5 GB, kraken2 database (nt) requiring 570 GB, kaiju database (nr) requiring 177 GB, and GTDB-Tk requiring 70 GB.
 
-```
-Find out which shell you are using
-ps -p $$
-   PID TTY          TIME CMD
- 17227 pts/26   00:00:00 bash
-```
-
 ### User installation, local
 
 ```
@@ -38,7 +31,7 @@ curl -H 'Authorization: token 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' -H 'Acce
 #wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod and assuming you use bash shell)
-bash install_ngs4ecoprod -i ~/ngs4ecoprod -s bash
+install_ngs4ecoprod -i ~/ngs4ecoprod -s bash
 
 # 3. Restart terminal or type
 source ~/.bashrc
