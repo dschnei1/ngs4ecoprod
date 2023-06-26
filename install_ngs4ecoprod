@@ -11,11 +11,12 @@ SECONDS=0
 
 
 # Set defaults
-export install_dir=~/ngs4ecoprod
-export shell=$bash
-export bash=~/.bashrc
-export zsh=~/.zshrc
+install_dir=~/ngs4ecoprod
+shell=$bash
+bash=~/.bashrc
+zsh=~/.zshrc
 
+echo "$zsh $bash"
 
 
 # Define help
@@ -41,10 +42,11 @@ Help()
 
 # Define options
 
-while getopts i:":h" flag
+while getopts i:s:":h" flag
 do
     case "${flag}" in
         i) install_dir=${OPTARG};;
+        s) shell=${OPTARG};;
         h) Help;exit;;
        \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
     esac
@@ -178,7 +180,7 @@ echo "Done."
 
 
 # 6. Create alias for the conda environment for easy access (this example is for bash shell, please change .bashrc to according to your shell, e.g., .zshrc etc.)
-echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> ~/.bashrc
+echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> $shell
 
 
 
