@@ -12,11 +12,10 @@ SECONDS=0
 
 # Set defaults
 install_dir=~/ngs4ecoprod
-shell=$bash
-bash=~/.bashrc
-zsh=~/.zshrc
 
-echo "$zsh $bash"
+pstree $$ > temp && sed -i "s/-.*//g" temp
+shell="~/.$(cat temp)rc"
+rm temp -f
 
 
 # Define help
@@ -33,7 +32,6 @@ Help()
    echo -e "\033[1;32mOptions:"
    echo -e "\033[0;37m"
    echo "         -i     Installation folder [default: ~/ngs4ecoprod]"
-   echo "         -s     Shell [default: bash]"
    echo "         -h     Print this help"
    echo
 }
@@ -42,11 +40,10 @@ Help()
 
 # Define options
 
-while getopts i:s:":h" flag
+while getopts i:":h" flag
 do
     case "${flag}" in
         i) install_dir=${OPTARG};;
-        s) shell=${OPTARG};;
         h) Help;exit;;
        \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
     esac
