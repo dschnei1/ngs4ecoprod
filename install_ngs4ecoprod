@@ -13,9 +13,6 @@ SECONDS=0
 # Set defaults
 install_dir=~/ngs4ecoprod
 
-pstree $$ > temp && sed -i "s/-.*//g" temp
-shell="~/.$(cat temp)rc"
-rm temp -f
 
 
 # Define help
@@ -27,11 +24,12 @@ Help()
    echo -e "\033[0;37minstall_ngs4ecoprod -i <destination_folder_for_ngs4ecoprod>"
    echo
    echo -e "\033[1;32mExample:"
-   echo -e "\033[0;37minstall_ngs4ecoprod -i ~/ngs4ecoprod"
+   echo -e "\033[0;37minstall_ngs4ecoprod -i ~/ngs4ecoprod -s bash"
    echo
    echo -e "\033[1;32mOptions:"
    echo -e "\033[0;37m"
-   echo "         -i     Installation folder [default: ~/ngs4ecoprod]"
+   echo "         -i     Installation folder"
+   echo "         -s     Shell type [bash, zsh]"
    echo "         -h     Print this help"
    echo
 }
@@ -40,14 +38,17 @@ Help()
 
 # Define options
 
-while getopts i:":h" flag
+while getopts i:s:":h" flag
 do
     case "${flag}" in
         i) install_dir=${OPTARG};;
+        s) user_shell=${OPTARG};;
         h) Help;exit;;
        \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
     esac
 done
+
+user_shell="~/.$(echo $user_shell)rc"
 
 
 
@@ -177,7 +178,7 @@ echo "Done."
 
 
 # 6. Create alias for the conda environment for easy access (this example is for bash shell, please change .bashrc to according to your shell, e.g., .zshrc etc.)
-echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> $shell
+echo "alias activate_ngs4ecoprod='source $install_dir/bin/activate ngs-4-ecoprod'" >> $user_shell
 
 
 
