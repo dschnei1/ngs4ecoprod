@@ -3,16 +3,14 @@ NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to advancing me
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
 
-The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can by removed at any time (also I hope you like it enough to not get rid of it).
-
-Pros and Cons?
+The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can be removed at any time.
 
 # Table of contents
 1. [Installation](#installation)
-2. [Uninstall NGS-4-ECOPROD](#uninstall-ngs-4-ecoprod)
-3. [Usage](#usage)
-4. [Issues](#issues)
-5. [Licence](#licence)
+2. [Install databases](#install-databases)
+3. [Uninstall NGS-4-ECOPROD](#uninstall-ngs-4-ecoprod)
+4. [Usage](#usage)
+5. [Issues](#issues)
 6. [Author](#author)
 7. [Citation](#citation)
 #
@@ -41,16 +39,6 @@ activate_ngs4ecoprod
 
 # 5. Remove installer
 rm -f install_ngs4ecoprod
-
-# 6. Install databases
-# Silva database for ngs4_16S
-ngs4_download_silva_db -i ~/ngs4ecoprod/dummy-repo/db
-
-# Databases for NanoPhase
-ngs4_download_nanophase -i ~/ngs4ecoprod/dummy-repo/db
-
-# kraken2 and kaiju databases
-#download_tax_k2k
 ```
 
 
@@ -78,16 +66,6 @@ activate_ngs4ecoprod
 
 # 6. Remove installer
 rm -f install_ngs4ecoprod
-
-# 7. Install databases
-# Silva database for ngs4_16S
-sudo $(which ngs4_download_silva_db) -i /opt/db
-
-# Databases for NanoPhase
-sudo $(which ngs4_download_nanophase) -i /opt/db
-
-# kraken2 and kaiju databases
-#download_tax_k2k
 ```
 
 #### NOTE: Before first use please run GNU parallel once after activating your conda environment and agree to conditions to cite or pay [GNU parallel](https://www.gnu.org/software/parallel/)
@@ -98,6 +76,23 @@ parallel --citation
 Here is a [list](software.txt) of all software installed by `install_ngs4ecoprod` via conda, in addition NanoPhase, metaWRAP and BLCA are installed alongside.
 #
 
+# Install databases
+
+Silva database for ngs4_16S & ngs4_16S_blca & ngs4_18S
+```
+ngs4_download_silva_db -i ~/ngs4ecoprod/dummy-repo/db
+```
+
+Databases for ngs4_np_assembly 
+```
+ngs4_download_nanophase -i ~/ngs4ecoprod/dummy-repo/db
+```
+
+kraken2 and kaiju databases for ngs4_tax & ngs4_np_tax
+```
+#download_tax_k2k
+```
+#
 
 # Uninstall NGS-4-ECOPROD
 To remove the pipeline do the following (adapt .bashrc to your shell)
@@ -121,12 +116,12 @@ So far the repository contains the following scripts:
 `ngs4_16S_blca_ncbi` \
 `ngs4_18S` 
 
-2. [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
+2. UNDER CONSTRUCTION! [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
 `ngs4_np_qf` \
 `ngs4_np_tax` \
 `ngs4_np_assembly`
 
-3. [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) \
+3. UNDER CONSTRUCTION! [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) \
 `ngs4_qf` \
 `ngs4_tax`
 #
@@ -335,29 +330,6 @@ ngs4_tax -i ~/ngs4_test_run -d ~/860_EVO_4TB/NGS-4-ECOPROD/db -p 1 -t 10 -m
 3. Assembly of of quality filtered short-reads
 ```
 ngs4_assemble
-```
-#
-
-
-# Example data
-
-Example data was obtained from Schneider et al. 2020 cite and subsetted to 100,000 reads per file with seqtk.
-```
-seqtk sample -s666 1611Go_UH_R1.fastq.gz 100000 > UH_R1.fastq
-seqtk sample -s666 1611Go_UH_R2.fastq.gz 100000 > UH_R2.fastq
-
-seqtk sample -s666 1611Go_Inlet_R1.fastq.gz 100000 > Inlet_R1.fastq
-seqtk sample -s666 1611Go_Inlet_R2.fastq.gz 100000 > Inlet_R2.fastq
-
-seqtk sample -s666 1611Go_SlDig_R1.fastq.gz 100000 > SlDig_R1.fastq
-seqtk sample -s666 1611Go_SlDig_R2.fastq.gz 100000 > SlDig_R2.fastq
-
-gzip *.fastq
-```
-
-phiX
-```
-bowtie2-build phiX174_NC_001422.1.fasta phiX
 ```
 #
 
