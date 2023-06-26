@@ -121,6 +121,12 @@ echo -e "\033[1;33mInstalling metaWRAP..."
 echo -e "\e[37m"
 $install_dir/bin/mamba create -y -n metawrap-env -c defaults -c conda-forge -c bioconda -c ursky  metawrap-mg=1.3.2
 
+# sra-toolkit
+echo
+echo -e "\033[1;33mInstalling sra-toolkit..."
+echo -e "\e[37m"
+mkdir $install_dir/sra-toolkit
+wget -q --show-progress -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.5/sratoolkit.3.0.5-ubuntu64.tar.gz -O sra-toolkit.tar.gz && tar -xzf sra-toolkit.tar.gz -C $install_dir/sra-toolkit --strip-components=1 && rm -f sra-toolkit.tar.gz
 
 
 # 4. Create conda environment with prerequisites using ngs-4-ecoprod.yml file:
@@ -146,10 +152,13 @@ echo -e "\e[37m"
 ln -s $install_dir/ngs4ecoprod/scripts/* $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/BLCA/*.py $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/NanoPhase/bin/* $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/sra-toolkit/bin/prefetch $install_dir/envs/ngs-4-ecoprod/bin/prefetch
+ln -s $install_dir/sra-toolkit/bin/fasterq-dump $install_dir/envs/ngs-4-ecoprod/bin/fasterq-dump
 # Ensure all scripts are executable
 chmod +x $install_dir/ngs4ecoprod/scripts/*
 chmod +x $install_dir/BLCA/*.py
 chmod +x $install_dir/NanoPhase/bin/*
+chmod +x $install_dir/sra-toolkit/bin/*
 # Modify BLCA to use python of ngs4ecopord environment and set percent identity of blast to 70% since the scripts --iset does not work/apply
 #sed -i.bak "s|^#!/usr/bin/env python|#!$install_dir/envs/ngs-4-ecoprod/bin/python|g ; s|str(eset), '-perc_identity', '90'|str(eset), '-perc_identity', '70'|g" $install_dir/BLCA/*.py
 sed -i.bak "s|^#!/usr/bin/env python|#!$install_dir/envs/ngs-4-ecoprod/bin/python|g" $install_dir/BLCA/*.py
