@@ -139,9 +139,9 @@ $install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/ngs4ecoprod/n
 echo
 echo -e "\033[1;33mInstalling GTDBtk..."
 echo -e "\e[37m"
-wget -q --show-progress https://anaconda.org/bioconda/gtdbtk/2.2.6/download/noarch/gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2
-$install_dir/bin/mamba install gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2 -n ngs-4-ecoprod
-rm -f gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2
+wget -q --show-progress https://anaconda.org/bioconda/gtdbtk/2.3.0/download/noarch/gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
+$install_dir/bin/mamba install gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2 -n ngs-4-ecoprod
+rm -f gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
 
 
 
