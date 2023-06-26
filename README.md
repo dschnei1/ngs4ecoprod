@@ -27,11 +27,11 @@ The current disk space requirement for the installation is approximately 23 GB, 
 
 ```
 # 1. Download install_ngs4ecoprod bash installation script
-curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
+curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod && chmod +x install_ngs4ecoprod
 #wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod and assuming you use bash shell)
-install_ngs4ecoprod -i ~/ngs4ecoprod -s bash
+./install_ngs4ecoprod -i ~/ngs4ecoprod -s bash
 
 # 3. Restart terminal or type
 source ~/.bashrc
