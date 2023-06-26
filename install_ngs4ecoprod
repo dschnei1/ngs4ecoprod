@@ -1,6 +1,6 @@
 #!/bin/bash
 # NGS-4-ECOPROD - Installation script
-# Dominik Schneider, 2023-02-13
+# Dominik Schneider, 2023-06-26
 
 
 
@@ -103,7 +103,7 @@ $install_dir/bin/conda install mamba -n base -c conda-forge -y
 echo
 echo -e "\033[1;33mDownloading ngs4ecoprod..."
 echo -e "\e[37m"
-git clone --recursive https://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@github.com/dschnei1/dummy-repo.git $install_dir/dummy-repo
+git clone --recursive https://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@github.com/dschnei1/ngs4ecoprod.git $install_dir/ngs4ecoprod
 
 # BLCA
 echo
@@ -119,7 +119,7 @@ git clone --recursive https://github.com/Hydro3639/NanoPhase $install_dir/NanoPh
 echo
 echo -e "\033[1;33mInstalling metaWRAP..."
 echo -e "\e[37m"
-$install_dir/bin/mamba create -y -n metawrap-env -c ursky metawrap-mg=1.3.2
+$install_dir/bin/mamba create -y -n metawrap-env -c defaults -c conda-forge -c bioconda -c ursky  metawrap-mg=1.3.2
 
 
 
@@ -127,7 +127,7 @@ $install_dir/bin/mamba create -y -n metawrap-env -c ursky metawrap-mg=1.3.2
 echo
 echo -e "\033[1;33mInstalling ngs4ecoprod..."
 echo -e "\e[37m"
-$install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/dummy-repo/ngs-4-ecoprod.yml
+$install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/ngs4ecoprod/ngs-4-ecoprod.yml
 
 # Install GTDBtk
 echo
@@ -143,11 +143,11 @@ rm -f gtdbtk-2.2.6-pyhdfd78af_1.tar.bz2
 echo
 echo -e "\033[1;33mSetting up ngs4ecoprod..."
 echo -e "\e[37m"
-ln -s $install_dir/dummy-repo/scripts/* $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/ngs4ecoprod/scripts/* $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/BLCA/*.py $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/NanoPhase/bin/* $install_dir/envs/ngs-4-ecoprod/bin/
 # Ensure all scripts are executable
-chmod +x $install_dir/dummy-repo/scripts/*
+chmod +x $install_dir/ngs4ecoprod/scripts/*
 chmod +x $install_dir/BLCA/*.py
 chmod +x $install_dir/NanoPhase/bin/*
 # Modify BLCA to use python of ngs4ecopord environment and set percent identity of blast to 70% since the scripts --iset does not work/apply
