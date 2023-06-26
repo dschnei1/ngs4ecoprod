@@ -365,10 +365,6 @@ bowtie2-build phiX174_NC_001422.1.fasta phiX
 If you notice any issues, please report them at Github issues.
 #
 
-# Licence
-The repository is licensed under the XXX license.
-#
-
 # Author
 Dominik Schneider (dschnei1@gwdg.de)
 #
