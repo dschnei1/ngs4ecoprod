@@ -51,7 +51,7 @@ dependencies:
   - libopenblas>=v0.3.21
   #- gtdbtk>=v2.2.6
   - pydantic
-  - sra-tools>=v3.0.5
+# - sra-tools>=v3.0.5
 # - sourmash>=v4.6.1
 # - muscle=v3.8.31
 # - sepp>=v4.5.1
