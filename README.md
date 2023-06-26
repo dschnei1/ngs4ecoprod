@@ -1,7 +1,7 @@
 # NGS-4-ECOPROD wrapper/pipeline collection
 NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to advancing metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with such data by automating key steps in the processing of raw sequence data and providing readily available basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
-This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenome sequencing of paired-end sequences, metagenome sequences from nanopore etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
+This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
 
 The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can by removed at any time (also I hope you like it enough to not get rid of it).
 
@@ -31,7 +31,7 @@ curl -H 'Authorization: token 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' -H 'Acce
 #wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod and assuming you use bash shell)
-./install_ngs4ecoprod -i ~/ngs4ecoprod -s bash
+./install_ngs4ecoprod -i ~/ngs4ecoprod
 
 # 3. Restart terminal or type
 source ~/.bashrc
