@@ -119,7 +119,7 @@ git clone --recursive https://github.com/Hydro3639/NanoPhase $install_dir/NanoPh
 echo
 echo -e "\033[1;33mInstalling metaWRAP..."
 echo -e "\e[37m"
-$install_dir/bin/mamba create -y -n metawrap-env -c ursky metawrap-mg=1.3.2
+$install_dir/bin/mamba create -y -n metawrap-env -c defaults -c conda-forge -c bioconda -c ursky  metawrap-mg=1.3.2
 
 
 
