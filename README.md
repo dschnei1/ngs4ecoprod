@@ -1,3 +1,5 @@
+Testphase v0.0
+
 # NGS-4-ECOPROD wrapper/pipeline collection
 NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to advancing metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with such data by automating key steps in the processing of raw sequence data and providing readily available basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
@@ -10,9 +12,8 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 2. [Install databases](#install-databases)
 3. [Uninstall NGS-4-ECOPROD](#uninstall-ngs-4-ecoprod)
 4. [Usage](#usage)
-5. [Issues](#issues)
-6. [Author](#author)
-7. [Citation](#citation)
+5. [Author](#author)
+6. [Citation](#citation)
 #
 
 # Installation 
@@ -331,10 +332,6 @@ ngs4_tax -i ~/ngs4_test_run -d ~/860_EVO_4TB/NGS-4-ECOPROD/db -p 1 -t 10 -m
 ```
 ngs4_assemble
 ```
-#
-
-# Issues
-If you notice any issues, please report them at Github issues.
 #
 
 # Author
