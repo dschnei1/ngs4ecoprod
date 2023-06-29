@@ -97,7 +97,7 @@ echo
 echo -e "\033[1;33mInstalling mamba..."
 echo -e "\e[37m"
 $install_dir/bin/conda install mamba -n base -c conda-forge -y 
-
+chmod +x $install_dir/bin/*
 
 
 # 3. Clone github NGS-4-ECOPROD & BLCA repository into conda
