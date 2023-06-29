@@ -79,17 +79,17 @@ Here is a [list](software.txt) of all software installed by `install_ngs4ecoprod
 
 # Install databases
 
-Silva database for ngs4_16S & ngs4_16S_blca & ngs4_18S
+Silva database for `ngs4_16S` & `ngs4_16S_blca` & `ngs4_18S`
 ```
 ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
-Databases for ngs4_np_assembly 
+Databases for `ngs4_np_assembly`
 ```
 ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
-kraken2 and kaiju databases for ngs4_tax & ngs4_np_tax
+kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
 ```
 #download_tax_k2k
 ```
