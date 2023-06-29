@@ -20,14 +20,14 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 
 You can either install the pipeline as a [user](#user-installation-local) into your home or as server [admin](#admin-installation-system-wide) in - for example - `/opt` and make it accessable for every user via an alias in the users `.bashrc` or corresponding shell.
 
-The current disk space requirement for the installation is approximately 23 GB, excluding the databases. However, when including the databases, the total disk space needed increases to 845 GB, with SILVA requiring an additional 5 GB, kraken2 database (nt) requiring 570 GB, kaiju database (nr) requiring 177 GB, and GTDB-Tk requiring 70 GB.
+The current disk space requirement for the installation is approximately 23 GB, excluding the databases. However, when including the databases, the total disk space needed increases to XXX GB, with SILVA requiring an additional 5 GB, kraken2 database (nt) requiring 640 GB, kaiju database (nr) requiring 177 GB, and GTDB-Tk & PLSDB requiring 70 GB.
 
 ### User installation, local
 
 ```
 # 1. Download install_ngs4ecoprod bash installation script
 curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
-#wget https://raw.githubusercontent.com/dschnei1/dummy-repo/main/install_ngs4ecoprod
+#wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
 bash install_ngs4ecoprod -i ~/ngs4ecoprod
@@ -81,12 +81,12 @@ Here is a [list](software.txt) of all software installed by `install_ngs4ecoprod
 
 Silva database for ngs4_16S & ngs4_16S_blca & ngs4_18S
 ```
-ngs4_download_silva_db -i ~/ngs4ecoprod/dummy-repo/db
+ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
 Databases for ngs4_np_assembly 
 ```
-ngs4_download_nanophase -i ~/ngs4ecoprod/dummy-repo/db
+ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
 kraken2 and kaiju databases for ngs4_tax & ngs4_np_tax
