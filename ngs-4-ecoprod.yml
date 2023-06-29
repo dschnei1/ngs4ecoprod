@@ -51,6 +51,7 @@ dependencies:
   - libopenblas>=v0.3.21
   #- gtdbtk>=v2.2.6
   - pydantic
+  - mesa-libgl-cos6-x86_64
 # - sra-tools>=v3.0.5
 # - sourmash>=v4.6.1
 # - muscle=v3.8.31
