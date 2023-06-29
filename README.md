@@ -20,7 +20,7 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 
 You can either install the pipeline as a [user](#user-installation-local) into your home or as server [admin](#admin-installation-system-wide) in - for example - `/opt` and make it accessable for every user via an alias in the users `.bashrc` or corresponding shell.
 
-The current disk space requirement for the installation is approximately 23 GB, excluding the databases. However, when including the databases, the total disk space needed increases to XXX GB, with SILVA requiring an additional 5 GB, kraken2 database (nt) requiring 640 GB, kaiju database (nr) requiring 177 GB, and GTDB-Tk & PLSDB requiring 70 GB.
+The current disk space requirement for the installation is approximately 28 GB, excluding the databases. However, when including the databases, the total disk space needed increases to XXX GB, with SILVA requiring an additional 1 GB, kraken2 database (nt) requiring 640 GB, kaiju database (nr) requiring 180 GB, and GTDB-Tk & PLSDB requiring 80 GB.
 
 ### User installation, local
 
