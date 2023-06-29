@@ -85,6 +85,7 @@ wget -q --show-progress https://repo.anaconda.com/miniconda/Miniconda3-latest-Li
 #wget -c --progress=bar:force:noscroll https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 # Install miniconda in your home directory
 bash Miniconda3-latest-Linux-x86_64.sh -b -p $install_dir
+chmod +x $install_dir/bin/*
 # Remove installer
 rm Miniconda3-latest-Linux-x86_64.sh* -f
 
