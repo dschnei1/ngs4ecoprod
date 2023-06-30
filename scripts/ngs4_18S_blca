@@ -1,0 +1,171 @@
+#!/bin/bash
+# NGS-4-ECOPROD - 18S rRNA gene pipeline - add BLCA table based on SILVA
+# Dominik Schneider, 2023-03-16
+
+
+
+# Count runtime of script
+# Method by user phk https://unix.stackexchange.com/users/117599/phk
+SECONDS=0
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_18S_blca -i <folder_with_amplicon_data> -d <silva_db_folder> -t <threads>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_18S_blca -i ~/ngs4_18S -d ~/ngs4ecoprod/ngs4ecoprod/db/silva -t 24"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Input folder containing 18S rRNA gene data previously analyzed with ngs4_18S"
+   echo "         -d     Path to silva database"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Set defaults
+export threads=1
+
+
+
+# Define options
+
+while getopts t:d:i:":h" flag
+do
+    case "${flag}" in
+        t) threads=${OPTARG};;
+        d) db_path=${OPTARG};;
+        i) input_folder=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+if [[ -z "$input_folder" ]]; then
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_18S_blca -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[0;37m"
+    exit 1
+fi
+
+# Check folder and return error
+DB="$db_path"
+if [ ! -d "$DB" ]; then
+  echo -e "\033[1;31mError silva database not found: $DB not found. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+IF="$input_folder"
+if [ ! -d "$IF" ]; then
+  echo -e "\033[1;31mError input folder $IF does not exist. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+if [ ! -d "$IF/10_blca_silva" ]; then
+  mkdir $input_folder/10_blca_silva
+fi
+
+
+
+
+# Start log file
+{
+
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m---------------------------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD BLCA annotation based on SILVA for ngs4_18S"
+echo -e "\033[1;31m---------------------------------------------------------"
+echo -e "\e[37m"
+echo "Number of threads:               $threads"
+echo "Database folder:                 $db_path"
+echo "Input folder:                    $input_folder"
+echo "Output folder:                   $input_folder/10_blca_silva"
+echo
+echo "Software:"
+echo "BLCA $(head $(which 2.blca_main.py) | grep "version" | sed 's|.* "||g ; s|"||g')"
+blastn -version > temp_file && grep "blastn" temp_file | sed "s|:||g ; s| v| |g" && rm -f temp_file
+echo "clustalo $(clustalo --version)"
+R --version | head -n 1 | sed "s|version ||g ; s| (2.*||g"
+Rscript $(which version_info.R) | grep "ampvis2\|stringr" | sed "s| *|| ; s| .* | |g"
+#muscle -version | sed "s/v//g ; s/ by.*//g"
+
+
+
+# Run BLCA on data
+echo
+echo -e "\033[1;33mRunning bayesian lowest common ancestor (BLCA) with SILVA 138.1 database"
+echo -e "\e[37m"
+
+cd $input_folder/10_blca_silva
+
+ln -s ../ASV_sequences.fasta
+
+2.blca_main.py -i ASV_sequences.fasta -r $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc_BLCA.taxonomy -q $db_path/SILVA_138.1_SSURef_NR99_tax_silva_trunc.fasta -o 1_blca.out -p $threads 1> BLCA.log
+
+echo "BLCA finished"
+
+rm -f ASV_sequences.fasta
+
+# Create final ASV table
+
+echo
+echo -e "\033[1;33mCreate ASV table with BLCA annotation"
+echo -e "\e[37m"
+
+paste <(cat ../06_mapping/pre_otu_table.tsv) <(awk 'BEGIN {OFS=FS="\t"} NR==FNR{map[$1]=$2;next} {for(i=1;i<=NF;i++)$i=($i in map)?map[$i]:$i}1' 1_blca.out  <(cut -f1 ../06_mapping/pre_otu_table.tsv | sed "s|#OTU ID|taxonomy|g")) > 2_ASV_table_BLCA_raw.tsv
+
+# Filter results and remove annotation for confidence <80
+Rscript $(which ASV_table_blca_finalize.R) 2>&- | tail -n 14 | sed "s|OTU|ASV|g" | head -n 11
+
+
+
+echo
+echo "ASV with SILVA BLCA annotation table finished"
+
+
+
+# Print script run time
+ELAPSED="Script run time: $(($SECONDS / 86400))d $(($SECONDS / 3600))h $((($SECONDS / 60) % 60))m $(($SECONDS % 60))s"
+
+echo
+echo -e "\033[1;32m$ELAPSED"
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD BLCA annotation for ngs4_18S finished!"
+echo -e "\033[0;37m"
+
+echo -e "\033[0;37mYou can analyze your results with:"
+echo -e "\033[1;32mcd $input_folder && rstudio markergene_18S.R"
+echo -e "\033[0;37mRemember to change the ASV table within the script"
+echo -e "\033[0;37m"
+
+# End log file
+} 2>&1 | tee -a ~/ngs4_18S_blca_$(date +"%Y-%m-%d_%T").log
+
+mv ~/ngs4_18S_blca_* $input_folder
