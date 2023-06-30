@@ -280,11 +280,11 @@ ngs4_18S_blca \
 `ASV_sequences.fasta`         FAST file containing all ASVs from your dataset \
 `ASV_table.tsv`               ASV read count table including blast classification \
 `ASV.tre`                     Phylogenetic tree of the ASV sequences \
-`markergene_16S.R`            Basic R-script to visualize and analyze your data \
+`markergene_18S.R`            Basic R-script to visualize and analyze your data \
 `metadata.tsv`                Template metadata file including SampleID \
 `ngs4_18S_DATE_TIME.log`      Pipeline log file
 
-#### `ngs4_16S_blca`
+#### `ngs4_18S_blca`
 
 `ASV_table_BLCA.tsv`          ASV read count table including BLCA SILVA classification \
 `ngs4_18S_blca_DATE_TIME.log` Pipeline log file
