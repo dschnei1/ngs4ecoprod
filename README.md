@@ -128,7 +128,7 @@ So far the repository contains the following data processing scripts:
 `ngs4_tax`
 
 
-### 1. Amplicon analysis pipeline (16S, bacteria and archaea)
+### 1. Amplicon analysis pipeline
 
 ### 16S rRNA genes (bacteria and archaea)
 
