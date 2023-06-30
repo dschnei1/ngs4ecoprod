@@ -110,7 +110,7 @@ sed -i -E "/^alias activate_ngs4ecoprod=.*/d" ~/.bashrc
 # Usage
 So far the repository contains the following data processing scripts:
 
-1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea, 18S rRNA gene Eukaryota)](#1-1-amplicon-analysis-pipeline-16S-bacteria-and-archaea) \
+1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea, 18S rRNA gene Eukaryota)](#1-amplicon-analysis-pipeline) \
 `ngs4_16S` \
 `ngs4_16S_blca` \
 `ngs4_16S_blca_ncbi` \
@@ -127,7 +127,9 @@ So far the repository contains the following data processing scripts:
 `ngs4_tax`
 #
 
-### 1.1 Amplicon analysis pipeline (16S, bacteria and archaea)
+### 1. Amplicon analysis pipeline (16S, bacteria and archaea)
+
+### 16S rRNA genes (bacteria and archaea)
 
 ![16S rRNA gene amplicon pipeline](images/16S_workflow.png)
 
@@ -229,7 +231,7 @@ ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
 
 
 
-### 1.2 Amplicon analysis pipeline (18S, Eukaryotes)
+### 18S rRNA genes (eukaryotes)
 
 This pipeline can be used for 18S rRNA gene amplicons and is very similar to the 16S rRNA gene pipeline. Defaults are currently set to match the primer pair TAReuk454FWD1 and TAReukREV3 designed by [Stoeck et al. (2015)](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2009.04480.x).
 
