@@ -12,6 +12,7 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 4. [Usage](#usage)
 5. [Author](#author)
 6. [Citation](#citation)
+7. [tl;dr](#tldr)
 
 
 
@@ -84,16 +85,16 @@ Silva database for `ngs4_16S` & `ngs4_16S_blca` & `ngs4_18S`
 ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
-Databases for `ngs4_np_assembly`
+Download GTDB-tk and PLSDB databases for `ngs4_np_assembly`
 ```
 #ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
-kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
+Download precompiled kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
 ```
 #download_tax_k2k
 ```
-
+Note: Need to find a server that supports a 0.6 TB file
 
 
 ## Uninstall NGS-4-ECOPROD
@@ -136,7 +137,7 @@ So far the repository contains the following data processing scripts:
 
 #### Bacterial/archaeal 16S rRNA gene amplicon data processing pipeline
 
-`ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and a phylogenetic tree of ASV sequences. The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
+`ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and a phylogenetic tree of ASV sequences. The pipeline uses [fastp](https://github.com/OpenGene/fastp), [cutadapt](https://cutadapt.readthedocs.io/en/stable/#), [vsearch](https://github.com/torognes/vsearch), [mafft](https://github.com/GSLBiotech/mafft), [FastTree](http://www.microbesonline.org/fasttree/), [NCBI blast](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/), [BLCA](https://github.com/qunfengdong/BLCA) and [R](https://www.r-project.org/). The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
 
 A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
 
@@ -328,7 +329,7 @@ ngs4_np_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data/nanopore -o ~/ngs4_np -p 3 
 
 #### 2. Taxonomic composition of long-reads (optional)
 
-To get a "rough" estimate of the taxonomic composition of your metagenomes you can use `ngs4_np_tax` which is a combination of Kraken2 and Kaiju against NCBIs nt and nr, respectively. These tools need large databases and also some more RAM (up to 5XX Gb) per process. The script will produce a read count table which you can the analyse in R.
+To get a "rough" estimate of the taxonomic composition of your metagenomes you can use `ngs4_np_tax` which is a combination of [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju) against NCBIs [nt](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz) and [nr](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz), respectively. These tools use large databases and also some more RAM (up to 670 Gb) per process, however, with -m this can be reduced. The script will produce a read count table which you can the analyse in R.
 
 #### Assign taxonomy to your long-reads:
 ```
@@ -340,9 +341,9 @@ ngs4_np_tax -i ~/ngs4_np -d ~/860_EVO_4TB/NGS-4-ECOPROD/db/ -p 1 -t 20 -m
          -i     Folder containing quality filtered fastq.gz
          -d     Path to databases (kraken2 & kaiju)
          -p     Number of processes [default: 1]
-                NOTE: per process you need 183-470 Gb of RAM
+                NOTE: per process you need 187-670 Gb of RAM
          -t     Number of CPU threads per process [default: 1]
-         -m     Reduce RAM requirements to 183 Gb (--memory-mapping for kraken2), slower
+         -m     Reduce RAM requirements to 187 Gb (--memory-mapping for kraken2), slower
                 NOTE: If your database is NOT located on a SSD expect long processing times
          -h     Print this help
 ```
@@ -368,10 +369,11 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
 
 
 
-
 ### 3. Metagenomics with Illumina data
 
-1. Quality filtering of paired-end sequences
+![Illumina pipeline](images/Illumina_workflow.png)
+
+#### 1. Quality filtering of paired-end sequences
 This will perform quality filtering on your raw sequence data. In detail low quality sequences will be removed, sequences will be trimmed if quality drops below the threshold, if reads overlap sequences will be polished according to the consensus.
 
 NOTE: There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
@@ -380,18 +382,45 @@ Sample1_R1.fastq.gz & Sample1_R2.fastq.gz
 ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ecoprod/ngs4ecoprod/db -p 3 -t 14
 ```
 
-2. Taxonomic classification of quality filtered paired short-reads 
-With script you assign taxonomy to your data with Kraken2 and Kaiju. Both classifications will be merged while Kraken2 annotation (more precision) is prioritized over Kaiju annotation (more sensitivity). In the end you will have an relative abundance table with taxonomic assignments.
+#### Options for `ngs4_qf`
+```
+         -i     Input folder containing paired-end fastq.gz
+                Note: files must be named according to the following scheme
+                Sample_name_R1.fastq.gz
+                Sample_name_R2.fastq.gz
+         -o     Output folder
+         -d     Path to databases
+         -l     Optional: Minimum length of sequence in bp [default: 50]
+         -q     Optional: Minimum phred score [default: 20]
+         -p     Number of processes [default: 1]
+         -t     Number of CPU threads per process [default: 1]
+         -h     Print this help
+```
 
-NOTE: This step is RAM intensive, per process you need at least 183 (-m) or 450 Gb of RAM
+#### 2. Taxonomic classification of quality filtered paired short-reads 
+With script you assign taxonomy to your data with [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju). Both classifications will be merged while Kraken2 annotation (higher precision) is prioritized over Kaiju annotation (higher sensitivity). In the end you will have an relative abundance table with taxonomic assignments.
+
+NOTE: This step is RAM intensive, per process you need at least 187 (-m) or 670 Gb of RAM
       In addition, make sure you have both databases located on a SSD drive!
 ```
-ngs4_tax -i ~/ngs4_test_run -d ~/860_EVO_4TB/NGS-4-ECOPROD/db -p 1 -t 10 -m
+ngs4_tax -i ~/ngs4_illumina -d ~/ngs4ecoprod/ngs4ecoprod/db -p 1 -t 10 -m
 ```
 
-3. Assembly of of quality filtered short-reads
+#### Options for `ngs4_tax`
 ```
-ngs4_assemble
+         -i     Folder containing quality filtered fastq.gz
+         -d     Path to databases (kraken2 & kaiju)
+         -p     Number of processes (default: 1)
+                NOTE: per process you need 187-670 Gb of RAM
+         -t     Number of CPU threads per process (default: 1)
+         -m     Reduce RAM requirements to 187 Gb (--memory-mapping for kraken2), slower
+                NOTE: If you use -m and your database is NOT located on a SSD expect long processing times
+         -h     Print this help
+```
+
+#### 3. Assembly of of quality filtered short-reads
+```
+#ngs4_assemble -i ~/ngs4_illumina
 ```
 
 
@@ -400,6 +429,23 @@ Dominik Schneider (dschnei1@gwdg.de)
 
 
 ## Citation
-Please note that you have to cite all the sophisticated software tools that are incorporated in the pipeline you used to generate your data: [software ngs4ecoprod environment](docs/ngs4ecoprod_env.txt)
+Please cite all the sophisticated software tools and databases that are incorporated into ngs4ecoprod that you used in your analysis: [software ngs4ecoprod environment](docs/ngs4ecoprod_env.txt)
 
-Since this repository currently has no associated publication, please cite it via the GitHub link: https://github.com/dschnei1/ngs4ecoprod
+Since this repository currently has no associated publication, please cite via the GitHub link: https://github.com/dschnei1/ngs4ecoprod
+
+## tl;dr
+
+Install ngs4ecoprod
+```
+curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
+bash install_ngs4ecoprod -i ~/ngs4ecoprod
+source ~/.bashrc
+activate_ngs4ecoprod
+rm -f install_ngs4ecoprod
+ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
+```
+
+16S rRNA gene amplicon pipeline
+```
+ngs4_16S -i ~/ngs4ecoprod/ngs4ecoprod/example_data/16S -o ~/ngs4_16S -d ~/ngs4ecoprod/ngs4ecoprod/db/silva -p 3 -t 8
+```
