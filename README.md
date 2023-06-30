@@ -108,38 +108,38 @@ sed -i -E "/^alias activate_ngs4ecoprod=.*/d" ~/.bashrc
 
 
 # Usage
-So far the repository contains the following scripts:
+So far the repository contains the following data processing scripts:
 
-1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea)](#1-amplicon-analysis-pipeline-16S-bacteria-and-archaea) \
+1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea, 18S rRNA gene Eukaryota)](#1-1-amplicon-analysis-pipeline-16S-bacteria-and-archaea) \
 `ngs4_16S` \
 `ngs4_16S_blca` \
 `ngs4_16S_blca_ncbi` \
 `ngs4_18S` \
 `ngs4_18S_blca`
 
-2. UNDER CONSTRUCTION! [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
+2. Under development! [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
 `ngs4_np_qf` \
 `ngs4_np_tax` \
 `ngs4_np_assembly`
 
-3. UNDER CONSTRUCTION! [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) \
+3. Under development! [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) \
 `ngs4_qf` \
 `ngs4_tax`
 #
 
-### 1. Amplicon analysis pipeline (16S, bacteria and archaea)
+### 1.1 Amplicon analysis pipeline (16S, bacteria and archaea)
 
 ![16S rRNA gene amplicon pipeline](images/16S_workflow.png)
 
-#### 1. Bacterial/archaeal 16S rRNA gene amplicon data processing pipeline
+#### Bacterial/archaeal 16S rRNA gene amplicon data processing pipeline
 
-`ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and phylogenetic tree of ASV sequences. The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid overinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any paired-end bacterial or archaeal amplicon raw dataset, see [options](#options-for-ngs4_16S).
+`ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and a phylogenetic tree of ASV sequences. The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
 
-A very basic R script is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
+A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
 
 
 
-Before you start you need your demultiplexed forward and reverse paired-end reads in one folder and make sure your sample names meet the following naming convention:
+Before you start you need demultiplexed forward and reverse paired-end reads, placed in one folder, and sample names must meet the following naming convention:
 ```
 <Sample_name>_<forward=R1_or_reverse=R2>.fastq.gz
 
@@ -184,7 +184,7 @@ ngs4_16S \
          -h     Print this help
 ```
 
-#### 2. Taxonomy assignment via BLCA using Silva or NCBIs 16S rRNA gene database
+#### Taxonomy assignment via BLCA using Silva or NCBIs 16S rRNA gene database
 
 Optional: Since `ngs4_16S` is using a "simple" blastn (megablast) to infer taxonomy of the ASVs you might want to use a more sophisticated approach for taxonomic assignment. You can use bayesian-based lowest common ancestor [(BLCA)](https://github.com/qunfengdong/BLCA) classification method on your data. This will take more computation time (depending on the diversity/amount of ASVs of your samples) mainly due to BLCA performing a blastn and a clustalo alignment of the ASV sequences.
 
@@ -195,7 +195,7 @@ To run BLCA with SILVA on your data after `ngs4_16S` has finished, process your 
 ```
 ngs4_16S_blca \
 -i ~/ngs4_16S \
--d ~/ngs4ecoprod/ngs4ecoprod/db/silva_blca \
+-d ~/ngs4ecoprod/ngs4ecoprod/db/silva \
 -p 3 -t 8
 ```
 
@@ -228,9 +228,70 @@ ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
 #
 
 
+
+### 1.2 Amplicon analysis pipeline (18S, Eukaryotes)
+
+This pipeline can be used for 18S rRNA gene amplicons and is very similar to the 16S rRNA gene pipeline. Defaults are currently set to match the primer pair TAReuk454FWD1 and TAReukREV3 designed by [Stoeck et al. (2015)](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2009.04480.x).
+
+#### Run `ngs4_18S` on your data
+
+```
+ngs4_18S \
+-i ~/raw_18S_data \
+-o ~/ngs4_18S \
+-d ~/ngs4ecoprod/ngs4ecoprod/db/silva \
+-p 3 -t 8
+```
+
+#### Options for `ngs4_18S`
+```
+         -i     Input folder containing paired-end fastq.gz
+                Note: files must be named according to the following scheme
+                Sample_name_R1.fastq.gz
+                Sample_name_R2.fastq.gz
+         -o     Output folder
+         -d     Path to silva database
+         -l     Optional: Minimum length of forward and reverse sequence in bp [default: 200]
+         -q     Optional: Minimum phred score [default: 20]
+         -p     Number of processes [default: 1]
+         -t     Number of CPU threads per process [default: 1]
+         -f     Optional: Forward primer [default: CCAGCASCYGCGGTAATTCC]
+         -r     Optional: Reverse primer [default: TYRATCAAGAACGAAAGT]
+                Note: Use the reverse complement sequence of your 18S rRNA gene reverse primer
+         -a     Optional: Minimum length of amplicon [default: 350]
+         -u     Optional: minsize parameter of UNOISE [default: 8]
+                Note: Only change under special circumstances, i.e., very low sample number
+         -h     Print this help
+```
+
+#### Taxonomy assignment via BLCA using Silva database
+
+```
+ngs4_18S_blca \
+-i ~/ngs4_18S \
+-d ~/ngs4ecoprod/ngs4ecoprod/db/silva \
+-p 3 -t 8
+```
+
+#### `ngs4_18S`
+
+`ASV_sequences.fasta`         FAST file containing all ASVs from your dataset \
+`ASV_table.tsv`               ASV read count table including blast classification \
+`ASV.tre`                     Phylogenetic tree of the ASV sequences \
+`markergene_16S.R`            Basic R-script to visualize and analyze your data \
+`metadata.tsv`                Template metadata file including SampleID \
+`ngs4_18S_DATE_TIME.log`      Pipeline log file
+
+#### `ngs4_16S_blca`
+
+`ASV_table_BLCA.tsv`          ASV read count table including BLCA SILVA classification \
+`ngs4_18S_blca_DATE_TIME.log` Pipeline log file
+
+
+
 ### 2. Metagenomics with Nanopore data
 
-![16S rRNA gene amplicon pipeline](images/Nanopore_workflow.png)
+![Nanopore pipeline](images/Nanopore_workflow.png)
 
 #### 1. Quality filter long-read data
 
