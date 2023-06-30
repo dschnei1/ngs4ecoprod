@@ -74,7 +74,7 @@ rm -f install_ngs4ecoprod
 parallel --citation
 ```
 
-Here is a [list](software.txt) of all software installed by `install_ngs4ecoprod` via conda, in addition [NanoPhase](https://github.com/Hydro3639/NanoPhase), [metaWRAP](https://github.com/bxlab/metaWRAP), [GTDB-tk](https://github.com/Ecogenomics/GTDBTk), [BLCA](https://github.com/qunfengdong/BLCA), [sra-toolkit](https://github.com/ncbi/sra-tools) are installed alongside.
+Here is a [list](docs/ngs4ecoprod_env.txt) of all software installed by `install_ngs4ecoprod` via conda, in addition [NanoPhase](https://github.com/Hydro3639/NanoPhase), [metaWRAP](https://github.com/bxlab/metaWRAP), [GTDB-tk](https://github.com/Ecogenomics/GTDBTk), [BLCA](https://github.com/qunfengdong/BLCA), [sra-toolkit](https://github.com/ncbi/sra-tools) are installed alongside.
 #
 
 # Install databases
@@ -403,4 +403,4 @@ Dominik Schneider (dschnei1@gwdg.de)
 
 # Citation
 Since this repository currently has no associated publication, please cite it via the GitHub link: https://github.com/dschnei1/ngs4ecoprod
-Please also note that you have to cite all the sophisticated software tools that are incorporated within this pipeline: [software list](software.txt)
+Please also note that you have to cite all the sophisticated software tools that are incorporated within this pipeline: [software list](docs/ngs4ecoprod_env.txt)
