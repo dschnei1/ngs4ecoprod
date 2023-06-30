@@ -1,4 +1,4 @@
-Early release v0.1
+Early release v0.1 - under active development
 
 # NGS-4-ECOPROD wrapper/pipeline collection
 NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with this kind of data by automating key steps in the processing of raw sequence data to human interpretable data. The pipeline provides basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
