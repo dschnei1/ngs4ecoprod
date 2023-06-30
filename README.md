@@ -402,5 +402,6 @@ Dominik Schneider (dschnei1@gwdg.de)
 #
 
 # Citation
+Please note that you have to cite all the sophisticated software tools that are incorporated in the pipeline you used to generate your data: [software ngs4ecoprod environment](docs/ngs4ecoprod_env.txt)
+
 Since this repository currently has no associated publication, please cite it via the GitHub link: https://github.com/dschnei1/ngs4ecoprod
-Please also note that you have to cite all the sophisticated software tools that are incorporated within this pipeline: [software list](docs/ngs4ecoprod_env.txt)
