@@ -1,11 +1,11 @@
-Testphase v0.01
+Early release v0.1
 
 # NGS-4-ECOPROD wrapper/pipeline collection
-NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to advancing metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with such data by automating key steps in the processing of raw sequence data and providing readily available basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
+NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with this kind of data by automating key steps in the processing of raw sequence data to human interpretable data. The pipeline provides basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
-This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425). The pipeline aims to automate and simplify metagenomic workflows (including 16S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.) from raw sequence data down to easy to access data such as read count tables of taxonomic composition, metabolic functions, gene sequences, metagenome assembled genomes etc..
+This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
 
-The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment which does not affect the linux operating system and can be removed at any time.
+The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment with the to not affect the linux operating system it is installed on and it can be removed at any time.
 
 # Table of contents
 1. [Installation](#installation)
@@ -20,7 +20,7 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 
 You can either install the pipeline as a [user](#user-installation-local) into your home or as server [admin](#admin-installation-system-wide) in - for example - `/opt` and make it accessable for every user via an alias in the users `.bashrc` or corresponding shell.
 
-The current disk space requirement for the installation is approximately 28 GB, excluding the databases. However, when including the databases, the total disk space needed increases to XXX GB, with SILVA requiring an additional 1 GB, kraken2 database (nt) requiring 640 GB, kaiju database (nr) requiring 180 GB, and GTDB-Tk & PLSDB requiring 80 GB.
+The current disk space requirement for the installation is approximately 23 GB without the databases. However, when including all databases needed, the total disk space needed increases to roughly 1 TB, with SILVA requiring an additional 1 GB, kraken2 database (nt) requiring 676 GB, kaiju database (nr) requiring 187 GB, and GTDB-Tk & PLSDB requiring 80 GB.
 
 ### User installation, local
 
@@ -74,7 +74,7 @@ rm -f install_ngs4ecoprod
 parallel --citation
 ```
 
-Here is a [list](software.txt) of all software installed by `install_ngs4ecoprod` via conda, in addition NanoPhase, metaWRAP and BLCA are installed alongside.
+Here is a [list](software.txt) of all software installed by `install_ngs4ecoprod` via conda, in addition [NanoPhase](https://github.com/Hydro3639/NanoPhase), [metaWRAP](https://github.com/bxlab/metaWRAP), [GTDB-tk](https://github.com/Ecogenomics/GTDBTk), [BLCA](https://github.com/qunfengdong/BLCA), [sra-toolkit](https://github.com/ncbi/sra-tools) are installed alongside.
 #
 
 # Install databases
@@ -86,7 +86,7 @@ ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
 
 Databases for `ngs4_np_assembly`
 ```
-ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
+#ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
 kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
@@ -103,7 +103,6 @@ rm -rf ~/ngs4ecoprod
 
 # 2. Remove alias from .bashrc
 sed -i -E "/^alias activate_ngs4ecoprod=.*/d" ~/.bashrc
-
 ```
 #
 
@@ -115,7 +114,8 @@ So far the repository contains the following scripts:
 `ngs4_16S` \
 `ngs4_16S_blca` \
 `ngs4_16S_blca_ncbi` \
-`ngs4_18S` 
+`ngs4_18S` \
+`ngs4_18S_blca`
 
 2. UNDER CONSTRUCTION! [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
 `ngs4_np_qf` \
@@ -340,3 +340,4 @@ Dominik Schneider (dschnei1@gwdg.de)
 
 # Citation
 Since this repository currently has no associated publication, please cite it via the GitHub link: https://github.com/dschnei1/ngs4ecoprod
+Please also note that you have to cite all the sophisticated software tools that are incorporated within this pipeline: [software list](software.txt)
