@@ -233,7 +233,7 @@ ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
 
 ### 18S rRNA genes (eukaryotes)
 
-This pipeline can be used for 18S rRNA gene amplicons and is very similar to the 16S rRNA gene pipeline. Defaults are currently set to match the primer pair TAReuk454FWD1 and TAReukREV3 designed by [Stoeck et al. (2015)](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2009.04480.x).
+This pipeline can be used for 18S rRNA gene amplicons and is very similar to the 16S rRNA gene pipeline, except that the Yarza correction is not applied to the blastn hits. Default settings are currently set to match the primer pair TAReuk454FWD1 and TAReukREV3 designed by [Stoeck et al. (2015)](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2009.04480.x).
 
 #### Run `ngs4_18S` on your data
 
