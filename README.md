@@ -12,7 +12,8 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 4. [Usage](#usage)
 5. [Author](#author)
 6. [Citation](#citation)
-#
+
+
 
 ## Installation 
 
@@ -73,7 +74,8 @@ parallel --citation
 ```
 
 Here is a [list](docs/ngs4ecoprod_env.txt) of all software installed by `install_ngs4ecoprod` via conda, in addition [NanoPhase](https://github.com/Hydro3639/NanoPhase), [metaWRAP](https://github.com/bxlab/metaWRAP), [GTDB-tk](https://github.com/Ecogenomics/GTDBTk), [BLCA](https://github.com/qunfengdong/BLCA), [sra-toolkit](https://github.com/ncbi/sra-tools) are installed alongside.
-#
+
+
 
 ## Install databases
 
@@ -91,7 +93,8 @@ kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
 ```
 #download_tax_k2k
 ```
-#
+
+
 
 ## Uninstall NGS-4-ECOPROD
 To remove the pipeline do the following (adapt .bashrc to your shell)
@@ -102,7 +105,7 @@ rm -rf ~/ngs4ecoprod
 # 2. Remove alias from .bashrc
 sed -i -E "/^alias activate_ngs4ecoprod=.*/d" ~/.bashrc
 ```
-#
+
 
 
 ## Usage
@@ -123,7 +126,7 @@ So far the repository contains the following data processing scripts:
 3. Under development! [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) \
 `ngs4_qf` \
 `ngs4_tax`
-#
+
 
 ### 1. Amplicon analysis pipeline (16S, bacteria and archaea)
 
@@ -136,8 +139,6 @@ So far the repository contains the following data processing scripts:
 `ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and a phylogenetic tree of ASV sequences. The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
 
 A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
-
-
 
 Before you start you need demultiplexed forward and reverse paired-end reads, placed in one folder, and sample names must meet the following naming convention:
 ```
@@ -225,7 +226,6 @@ ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
 
 `ASV_table_BLCA_ncbi.tsv`          ASV read count table including BLCA NCBI classification \
 `ngs4_16S_blca_ncbi_DATE_TIME.log` Pipeline log file
-#
 
 
 
@@ -346,7 +346,7 @@ ngs4_np_tax -i ~/ngs4_np -d ~/860_EVO_4TB/NGS-4-ECOPROD/db/ -p 1 -t 20 -m
                 NOTE: If your database is NOT located on a SSD expect long processing times
          -h     Print this help
 ```
-#
+
 
 #### 3. Assembly of long reads & generating metagenome assembled genomes
 
@@ -365,7 +365,7 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
          -t     Number of CPU threads per process [default: 1]
          -h     Print this help
 ```
-#
+
 
 
 
@@ -393,11 +393,11 @@ ngs4_tax -i ~/ngs4_test_run -d ~/860_EVO_4TB/NGS-4-ECOPROD/db -p 1 -t 10 -m
 ```
 ngs4_assemble
 ```
-#
+
 
 ## Author
 Dominik Schneider (dschnei1@gwdg.de)
-#
+
 
 ## Citation
 Please note that you have to cite all the sophisticated software tools that are incorporated in the pipeline you used to generate your data: [software ngs4ecoprod environment](docs/ngs4ecoprod_env.txt)
