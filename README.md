@@ -3,7 +3,7 @@ NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome d
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
 
-The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a (mini)conda environment with the to not affect the linux operating system it is installed on and it can be removed at any time.
+The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the to not affect the linux operating system it is installed on and it can be removed at any time.
 
 ## Table of contents
 1. [Installation](#installation)
