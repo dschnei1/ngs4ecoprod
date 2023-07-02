@@ -119,12 +119,12 @@ So far the repository contains the following data processing scripts:
 `ngs4_18S` \
 `ngs4_18S_blca`
 
-2. Under development! [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) \
+2. [Nanopore: Metagenome analysis](#2-metagenomics-with-nanopore-data) Under active development! \
 `ngs4_np_qf` \
 `ngs4_np_tax` \
 `ngs4_np_assembly`
 
-3. Under development! [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) \
+3. [Illumina: Metagenome analysis](#3-metagenomics-with-illumina-data) Under active development! \
 `ngs4_qf` \
 `ngs4_tax`
 
@@ -137,7 +137,26 @@ So far the repository contains the following data processing scripts:
 
 #### Bacterial/archaeal 16S rRNA gene amplicon data processing pipeline
 
-`ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and a phylogenetic tree of ASV sequences. The pipeline uses [fastp](https://github.com/OpenGene/fastp), [cutadapt](https://cutadapt.readthedocs.io/en/stable/#), [vsearch](https://github.com/torognes/vsearch), [mafft](https://github.com/GSLBiotech/mafft), [FastTree](http://www.microbesonline.org/fasttree/), [NCBI blast](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/), [BLCA](https://github.com/qunfengdong/BLCA) and [R](https://www.r-project.org/). The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
+`ngs4_16S` is a 16S rRNA gene amplicon analysis pipeline providing processing of raw reads to amplicon sequence variant (ASV) sequences, read count table and a phylogenetic tree of ASV sequences. The pipeline uses the tools [fastp](https://github.com/OpenGene/fastp), [cutadapt](https://cutadapt.readthedocs.io/en/stable/#), [vsearch](https://github.com/torognes/vsearch), [mafft](https://github.com/GSLBiotech/mafft), [FastTree](http://www.microbesonline.org/fasttree/), [NCBI blast](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/), [BLCA](https://github.com/qunfengdong/BLCA) and [R](https://www.r-project.org/). 
+
+In principle the following steps are performed by the pipeline: 
+1. all raw reads are quality filtered 
+2. all primer sequences are removed
+3. paired-end reads are stitched together
+4. reads are sorted by length 
+5. reads are dereplicated (by default sorted by decreasing abundance)
+6. reads are denoised, see [UNOISE3](https://www.drive5.com/usearch/manual/cmd_unoise3.html)
+7. de novo chimera removal
+8. reference based chimera removal (reference SILVA)
+9. final set of ASVs
+10. quality filtered reads are mapped back against the ASVs
+11. blastn against SILVA
+12. ASV count table generation
+13. phylogenetic tree from ASVs
+14. data formatting and curation (see [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330))
+15. final ASV count table
+
+The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
 
 A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
 
@@ -172,7 +191,7 @@ ngs4_16S \
                 Sample_name_R1.fastq.gz
                 Sample_name_R2.fastq.gz
          -o     Output folder
-         -d     Path to silva database
+         -d     Path to SILVA database
          -l     Optional: Minimum length of forward and reverse sequence in bp [default: 200]
          -q     Optional: Minimum phred score [default: 20]
          -p     Number of processes [default: 1]
@@ -251,7 +270,7 @@ ngs4_18S \
                 Sample_name_R1.fastq.gz
                 Sample_name_R2.fastq.gz
          -o     Output folder
-         -d     Path to silva database
+         -d     Path to SILVA database
          -l     Optional: Minimum length of forward and reverse sequence in bp [default: 200]
          -q     Optional: Minimum phred score [default: 20]
          -p     Number of processes [default: 1]

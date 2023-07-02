@@ -40,7 +40,7 @@ Help()
    echo "                Sample_name_R1.fastq.gz"
    echo "                Sample_name_R2.fastq.gz"
    echo "         -o     Output folder"
-   echo "         -d     Path to silva database"
+   echo "         -d     Path to SILVA database"
    echo "         -l     Optional: Minimum length of forward and reverse sequence in bp [default: $min_length]"
    echo "         -q     Optional: Minimum phred score [default: $min_quality]"
    echo "         -p     Number of processes [default: $processes]"
