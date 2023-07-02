@@ -47,4 +47,3 @@ dependencies:
   - fastani>=v1.33
   - libopenblas>=v0.3.21
   - pydantic
-  - mesa-libgl-devel-cos7-x86_64
