@@ -70,7 +70,7 @@ activate_ngs4ecoprod
 rm -f install_ngs4ecoprod
 ```
 
-#### NOTE: Before first use please run GNU parallel once after activating your conda environment and agree to conditions to cite or pay [GNU parallel](https://www.gnu.org/software/parallel/)
+#### Note: Before first use please run GNU parallel once after activating your conda environment and agree to conditions to cite or pay [GNU parallel](https://www.gnu.org/software/parallel/)
 ```
 parallel --citation
 ```
@@ -363,10 +363,10 @@ ngs4_np_tax -i ~/ngs4_np -d ~/860_EVO_4TB/NGS-4-ECOPROD/db/ -p 1 -t 20 -m
          -i     Folder containing quality filtered fastq.gz
          -d     Path to databases (kraken2 & kaiju)
          -p     Number of processes [default: 1]
-                NOTE: per process you need 187-670 Gb of RAM
+                Note: per process you need 187-670 Gb of RAM
          -t     Number of CPU threads per process [default: 1]
          -m     Reduce RAM requirements to 187 Gb (--memory-mapping for kraken2), slower
-                NOTE: If your database is NOT located on a SSD expect long processing times
+                Note: If your database is NOT located on a SSD expect long processing times
          -h     Print this help
 ```
 
@@ -384,7 +384,7 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
 ```
          -i     Folder containing quality filtered fastq.gz
          -p     Number of processes [default: 1]
-                NOTE: Better only use one process here - depending on your system
+                Note: Better only use one process here - depending on your system
          -t     Number of CPU threads per process [default: 1]
          -h     Print this help
 ```
@@ -398,7 +398,7 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
 #### 1. Quality filtering of paired-end sequences
 This will perform quality filtering on your raw sequence data. In detail low quality sequences will be removed, sequences will be trimmed if quality drops below the threshold, sequences will be polished according to the consensus if reads overlap.
 
-NOTE: There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
+Note: There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
 Sample1_R1.fastq.gz & Sample1_R2.fastq.gz
 ```
 ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ecoprod/ngs4ecoprod/db -p 3 -t 14
@@ -422,7 +422,7 @@ ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ec
 #### 2. Taxonomic classification of quality filtered paired short-reads 
 With this script you assign taxonomy to your data with [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju). Both classifications will be merged while Kraken2 annotation (higher precision) is prioritized over Kaiju annotation (higher sensitivity). In the end you will have an relative abundance table with taxonomic assignments.
 
-NOTE: \
+Note: \
 This step is RAM intensive, per process you need at least 187 (-m) or 670 Gb of RAM. \
 In addition, make sure you have both databases located on a SSD drive!
 
@@ -435,10 +435,10 @@ ngs4_tax -i ~/ngs4_illumina -d ~/ngs4ecoprod/ngs4ecoprod/db -p 1 -t 10 -m
          -i     Folder containing quality filtered fastq.gz
          -d     Path to databases (kraken2 & kaiju)
          -p     Number of processes (default: 1)
-                NOTE: per process you need 187-670 Gb of RAM
+                Note: per process you need 187-670 Gb of RAM
          -t     Number of CPU threads per process (default: 1)
          -m     Reduce RAM requirements to 187 Gb (--memory-mapping for kraken2), slower
-                NOTE: If you use -m and your database is NOT located on a SSD expect long processing times
+                Note: If you use -m and your database is NOT located on a SSD expect long processing times
          -h     Print this help
 ```
 

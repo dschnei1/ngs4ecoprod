@@ -33,10 +33,10 @@ Help()
    echo "         -i     Folder containing quality filtered fastq.gz"
    echo "         -d     Path to databases (kraken2 & kaiju)"
    echo "         -p     Number of processes [default: $processes]"
-   echo "                NOTE: per process you need 183-470 Gb of RAM"
+   echo "                Note: per process you need 183-470 Gb of RAM"
    echo "         -t     Number of CPU threads per process [default: $threads]"
    echo "         -m     Reduce RAM requirements to 183 Gb (--memory-mapping for kraken2), slower"
-   echo "                NOTE: If your database is NOT located on a SSD expect long processing times"
+   echo "                Note: If your database is NOT located on a SSD expect long processing times"
    echo "         -h     Print this help"
    echo
 }

@@ -24,7 +24,7 @@ Help()
    echo -e "\033[1;32mOptions:"
    echo -e "\033[0;37m"
    echo "         -i     Input folder containing 16S rRNA gene data previously analyzed with ngs4_16S"
-   echo "         -d     Path to silva database"
+   echo "         -d     Path to SILVA database"
    echo "         -h     Print this help"
    echo
 }
