@@ -1,9 +1,9 @@
 # NGS-4-ECOPROD wrapper/pipeline collection
-NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome data processing and analysis. It aims to simplify the often complex and labor-intensive tasks associated with this kind of data by automating key steps in the processing of raw sequence data to human interpretable data. The pipeline provides basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
+NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome data processing and analysis. The installation script sets up a Miniconda folder and Conda environments where all the necessary tools are installed. It does not interfere with the Linux system. ngs4ecoprod aims to simplify the often complex and labor-intensive tasks associated with this kind of data by automating key steps in the processing of raw sequence data to human interpretable data. The pipeline provides basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
 
-The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the linux operating system it is installed.
+The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the linux operating system it is installed on.
 
 ## Table of contents
 1. [Installation](#installation)
@@ -161,7 +161,7 @@ The default configuration of the pipeline is for Illumina MiSeq paired-end reads
 
 A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
 
-Before you start you need demultiplexed forward and reverse paired-end reads, placed in one folder, and sample names *must* meet the following naming convention:
+Before you start you need demultiplexed forward and reverse paired-end reads, placed in one folder, and sample names **must** meet the following naming convention:
 ```
 <Sample_name>_<forward=R1_or_reverse=R2>.fastq.gz
 
@@ -170,7 +170,7 @@ Sample_1_R1.fastq.gz
 Sample_1_R2.fastq.gz
 Sample_2_R1.fastq.gz
 Sample_2_R2.fastq.gz
-...
+etc.
 ```
 
 Afterwards you can start the pipeline (here with example data) to process your 16S rRNA gene amplicon data.
@@ -318,14 +318,15 @@ ngs4_18S_blca \
 
 To ensure high quality long-reads, the first step is filtering your data with `ngs_np_qf` which includes a general quality filter with [fastp](https://github.com/OpenGene/fastp) and afterwards removal of barcode leftovers at the ends and/or in the middle of the long-reads with [Porechop_ABI](https://github.com/bonsai-team/Porechop_ABI) (an extension of [Porechop](https://github.com/rrwick/Porechop)).
 
-Before you start you need your basecalled long-reads in one folder and make sure your sample names meet the following naming convention:
+Before you start you need your basecalled long-reads in one folder and your file names **must** meet the following naming convention:
 ```
 <Sample_name>.fastq.gz
 
 # Example
 Sample_1.fastq.gz
 Sample_2.fastq.gz
-...
+Sample_3.fastq.gz
+etc.
 ```
 
 #### Quality filter your reads with:
