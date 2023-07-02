@@ -20,14 +20,13 @@ The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is 
 
 You can either install the pipeline as a [user](#user-installation-local) into your home or as server [admin](#admin-installation-system-wide) in - for example - `/opt` and make it accessable for every user via an alias in the users `.bashrc` or corresponding shell (e.g., zsh, ksh, tcsh etc.).
 
-The current disk space requirement for the installation is approximately 23 GB without the databases. However, when including all databases needed, the total disk space needed increases to roughly 1 TB, with SILVA requiring an additional 1 GB, kraken2 database (nt) requiring 676 GB, kaiju database (nr) requiring 187 GB, and GTDB-Tk & PLSDB requiring 80 GB.
+The current disk space requirement for the installation is approximately 23 GB without the databases. However, when including all databases needed, the total disk space needed increases to roughly 1 TB (July 2023), with SILVA requiring an additional 1 GB, kraken2 database (nt) requiring 676 GB, kaiju database (nr) requiring 187 GB, and GTDB-Tk & PLSDB requiring 80 GB.
 
 ### User installation, local
 
 ```
 # 1. Download install_ngs4ecoprod bash installation script
-curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
-#wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
+wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
 bash install_ngs4ecoprod -i ~/ngs4ecoprod
@@ -48,8 +47,7 @@ rm -f install_ngs4ecoprod
 
 ```
 # 1. Download install_ngs4ecoprod bash installation script
-curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
-#wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
+wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
 sudo bash install_ngs4ecoprod -i /opt/ngs4ecoprod
