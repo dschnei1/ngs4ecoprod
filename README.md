@@ -155,7 +155,6 @@ In principle the following steps are performed by the pipeline:
 13. phylogenetic tree from ASVs
 14. data formatting and curation (minimum of 85% query coverage + lineage correction for 16S rRNA gene amplicons)
 15. final ASV count table
-
 16. Optional: for a more robust classification use BLCA against SILVA or NCBIs 16S rRNA
 
 The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast.
