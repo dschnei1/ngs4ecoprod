@@ -1,4 +1,7 @@
-# NGS-4-ECOPROD wrapper/pipeline collection v0.1
+# NGS-4-ECOPROD wrapper/pipeline collection
+v0.1
+
+
 NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome data processing and analysis. The installation script sets up a Miniconda folder and Conda environments where all the necessary tools are installed. It does not interfere with the Linux system. ngs4ecoprod aims to simplify the often complex and labor-intensive tasks associated with this kind of data by automating key steps in the processing of raw sequence data to human interpretable data. The pipeline provides basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon analysis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
