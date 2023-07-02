@@ -147,20 +147,22 @@ In principle the following steps are performed by the pipeline:
 5. reads are dereplicated (by default sorted by decreasing abundance)
 6. reads are denoised, see [UNOISE3](https://www.drive5.com/usearch/manual/cmd_unoise3.html)
 7. de novo chimera removal
-8. reference based chimera removal (reference SILVA)
+8. reference-based chimera removal (reference SILVA NR99 138.1)
 9. final set of ASVs
 10. quality filtered reads are mapped back against the ASVs
 11. blastn against SILVA
 12. ASV count table generation
 13. phylogenetic tree from ASVs
-14. data formatting and curation (see [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330))
+14. data formatting and curation (minimum of 85% query coverage + lineage correction for 16S rRNA gene amplicons)
 15. final ASV count table
 
-The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast. However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)).
+16. Optional: for a more robust classification use BLCA against SILVA or NCBIs 16S rRNA
+
+The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast.
 
 A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
 
-Before you start you need demultiplexed forward and reverse paired-end reads, placed in one folder, and sample names must meet the following naming convention:
+Before you start you need demultiplexed forward and reverse paired-end reads, placed in one folder, and sample names *must* meet the following naming convention:
 ```
 <Sample_name>_<forward=R1_or_reverse=R2>.fastq.gz
 
@@ -220,7 +222,7 @@ ngs4_16S_blca \
 -p 3 -t 8
 ```
 
-To run BLCA with NCBIs 16S rRNA gene database on your data after `ngs4_16S` has finished, process your data with `ngs4_16S_blca_ncbi` (Note: every time you start the script the most recent version of the database will be downloaded) as follows:
+To run BLCA with [NCBIs 16S rRNA gene database](https://ftp.ncbi.nlm.nih.gov/blast/db/16S_ribosomal_RNA.tar.gz) on your data after `ngs4_16S` has finished, process your data with `4_16S_blca_ncbi` (Note: every time you start the script the most recent version of the database will be downloaded) as follows:
 
 ```
 ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
