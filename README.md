@@ -1,7 +1,7 @@
 # NGS-4-ECOPROD wrapper/pipeline collection v0.1
 NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome data processing and analysis. The installation script sets up a Miniconda folder and Conda environments where all the necessary tools are installed. It does not interfere with the Linux system. ngs4ecoprod aims to simplify the often complex and labor-intensive tasks associated with this kind of data by automating key steps in the processing of raw sequence data to human interpretable data. The pipeline provides basic analysis scripts and tools from the public domain. The overarching goal is to optimize time utilization by streamlining data workflows, allowing researchers to devote more time to the substantive biological analysis.
 
-This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon anaylsis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
+This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon analysis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
 
 The pipeline was tested under Linux (Ubuntu 12.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the linux operating system it is installed on.
 
@@ -110,7 +110,7 @@ sed -i -E "/^alias activate_ngs4ecoprod=.*/d" ~/.bashrc
 ## Usage
 So far the repository contains the following data processing scripts:
 
-1. [Amplicon analysis pipeline (16S rRNA gene, bacteria and archaea, 18S rRNA gene Eukaryota)](#1-amplicon-analysis-pipeline) \
+1. [Amplicon analysis pipeline (16S rRNA gene, Bacteria and Archaea, 18S rRNA gene Eukaryota)](#1-amplicon-analysis-pipeline) \
 `ngs4_16S` \
 `ngs4_16S_blca` \
 `ngs4_16S_blca_ncbi` \
@@ -348,7 +348,7 @@ ngs4_np_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data/nanopore -o ~/ngs4_np -p 3 
 
 #### 2. Taxonomic composition of long-reads (optional)
 
-To get a "rough" estimate of the taxonomic composition of your metagenomes you can use `ngs4_np_tax` which is a combination of [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju) against NCBIs [nt](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz) and [nr](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz), respectively. These tools use large databases and also some more RAM (up to 670 Gb) per process, however, with -m this can be reduced. The script will produce a read count table which you can the analyse in R.
+To get a "rough" estimate of the taxonomic composition of your metagenomes you can use `ngs4_np_tax` which is a combination of [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju) against NCBIs [nt](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz) and [nr](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz), respectively. These tools use large databases and also some more RAM (up to 670 Gb) per process, however, with -m this can be reduced. The script will produce a read count table which you can then analyze in R.
 
 #### Assign taxonomy to your long-reads:
 ```
@@ -381,7 +381,7 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
 ```
          -i     Folder containing quality filtered fastq.gz
          -p     Number of processes [default: 1]
-                NOTE: Better ony use one process here - depending on your system
+                NOTE: Better only use one process here - depending on your system
          -t     Number of CPU threads per process [default: 1]
          -h     Print this help
 ```
@@ -393,7 +393,7 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
 ![Illumina pipeline](images/Illumina_workflow.png)
 
 #### 1. Quality filtering of paired-end sequences
-This will perform quality filtering on your raw sequence data. In detail low quality sequences will be removed, sequences will be trimmed if quality drops below the threshold, if reads overlap sequences will be polished according to the consensus.
+This will perform quality filtering on your raw sequence data. In detail low quality sequences will be removed, sequences will be trimmed if quality drops below the threshold, sequences will be polished according to the consensus if reads overlap.
 
 NOTE: There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
 Sample1_R1.fastq.gz & Sample1_R2.fastq.gz
@@ -417,10 +417,12 @@ ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ec
 ```
 
 #### 2. Taxonomic classification of quality filtered paired short-reads 
-With script you assign taxonomy to your data with [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju). Both classifications will be merged while Kraken2 annotation (higher precision) is prioritized over Kaiju annotation (higher sensitivity). In the end you will have an relative abundance table with taxonomic assignments.
+With this script you assign taxonomy to your data with [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju). Both classifications will be merged while Kraken2 annotation (higher precision) is prioritized over Kaiju annotation (higher sensitivity). In the end you will have an relative abundance table with taxonomic assignments.
 
-NOTE: This step is RAM intensive, per process you need at least 187 (-m) or 670 Gb of RAM
-      In addition, make sure you have both databases located on a SSD drive!
+NOTE: \
+This step is RAM intensive, per process you need at least 187 (-m) or 670 Gb of RAM. \
+In addition, make sure you have both databases located on a SSD drive!
+
 ```
 ngs4_tax -i ~/ngs4_illumina -d ~/ngs4ecoprod/ngs4ecoprod/db -p 1 -t 10 -m
 ```
