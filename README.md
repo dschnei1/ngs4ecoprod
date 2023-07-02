@@ -456,7 +456,7 @@ Since this repository currently has no associated publication, please cite via t
 
 Install ngs4ecoprod
 ```
-curl -H 'Authorization: token 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' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/dschnei1/ngs4ecoprod/contents/install_ngs4ecoprod
+wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 bash install_ngs4ecoprod -i ~/ngs4ecoprod
 source ~/.bashrc
 activate_ngs4ecoprod
