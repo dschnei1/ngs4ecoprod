@@ -229,7 +229,7 @@ ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
 
 #### `ngs4_16S`
 
-`ASV_sequences.fasta`         FAST file containing all ASVs from your dataset \
+`ASV_sequences.fasta`         FASTA file containing all ASVs from your dataset \
 `ASV_table.tsv`               ASV read count table including blast classification \
 `ASV.tre`                     Phylogenetic tree of the ASV sequences \
 `markergene_16S.R`            Basic R-script to visualize and analyze your data \
@@ -294,7 +294,7 @@ ngs4_18S_blca \
 
 #### `ngs4_18S`
 
-`ASV_sequences.fasta`         FAST file containing all ASVs from your dataset \
+`ASV_sequences.fasta`         FASTA file containing all ASVs from your dataset \
 `ASV_table.tsv`               ASV read count table including blast classification \
 `ASV.tre`                     Phylogenetic tree of the ASV sequences \
 `markergene_18S.R`            Basic R-script to visualize and analyze your data \
