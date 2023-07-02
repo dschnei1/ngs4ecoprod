@@ -31,7 +31,7 @@ Help()
    echo -e "\033[0;37m"
    echo "         -i     Folder containing quality filtered fastq.gz"
    echo "         -p     Number of processes [default: $processes]"
-   echo "                NOTE: Better ony use one process here - depending on your system"
+   echo "                NOTE: Better only use one process here - depending on your system"
    echo "         -t     Number of CPU threads per process [default: $threads]"
    echo "         -h     Print this help"
    echo
