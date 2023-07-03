@@ -132,7 +132,7 @@ So far the repository contains the following data processing scripts:
 
 ### 1. Amplicon analysis pipeline
 
-### 16S rRNA genes (bacteria and archaea)
+### &rarr; 16S rRNA genes (bacteria and archaea)
 
 ![16S rRNA gene amplicon pipeline](images/16S_workflow.png)
 
