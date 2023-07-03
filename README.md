@@ -393,6 +393,9 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
          -h     Print this help
 ```
 
+#
+#
+#
 
 
 ### 3. Metagenomics with Illumina data
@@ -400,10 +403,23 @@ ngs4_np_assembly -i ~/ngs4_np -p 1 -t 20
 ![Illumina pipeline](images/Illumina_workflow.png)
 
 #### 1. Quality filtering of paired-end sequences
-This will perform quality filtering on your raw sequence data. In detail low quality sequences will be removed, sequences will be trimmed if quality drops below the threshold, sequences will be polished according to the consensus if reads overlap.
+This will perform quality filtering on your raw sequence data. In detail low quality sequences will be removed, sequences will be trimmed if quality drops below the threshold, sequences will be polished according to the consensus if reads overlap. In addition adapter leftovers will be removed and possible leftovers of phiX.
 
-Note: There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
-Sample1_R1.fastq.gz & Sample1_R2.fastq.gz
+Note: \
+There is one requirement for the script to work (see example files), your file names have to meet the following scheme: 
+```
+<Sample_name>_<forward=R1_or_reverse=R2>.fastq.gz
+
+# Example
+Sample_1_R1.fastq.gz
+Sample_1_R2.fastq.gz
+Sample_2_R1.fastq.gz
+Sample_2_R2.fastq.gz
+etc.
+```
+
+
+#### Run the quality filter `ngs4_qf`
 ```
 ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ecoprod/ngs4ecoprod/db -p 3 -t 14
 ```
@@ -428,7 +444,7 @@ With this script you assign taxonomy to your data with [Kraken2](https://github.
 
 Note: \
 This step is RAM intensive, per process you need at least 187 (-m) or 670 Gb of RAM. \
-In addition, make sure you have both databases located on a SSD drive!
+In addition, make sure you have both databases (nt & nr) located on a SSD drive!
 
 ```
 ngs4_tax -i ~/ngs4_illumina -d ~/ngs4ecoprod/ngs4ecoprod/db -p 1 -t 10 -m
@@ -446,7 +462,7 @@ ngs4_tax -i ~/ngs4_illumina -d ~/ngs4ecoprod/ngs4ecoprod/db -p 1 -t 10 -m
          -h     Print this help
 ```
 
-#### 3. Assembly of of quality filtered short-reads
+#### 3. Assembly of of quality filtered short-reads (on hold)
 ```
 #ngs4_assemble -i ~/ngs4_illumina
 ```
