@@ -310,6 +310,10 @@ ngs4_18S_blca \
 `ngs4_18S_blca_DATE_TIME.log` &rarr; Pipeline log file
 
 
+#
+#
+#
+
 
 ### 2. Metagenomics with Nanopore data
 
