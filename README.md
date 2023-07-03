@@ -249,7 +249,7 @@ ngs4_16S_blca_ncbi -i ~/ngs4_16S -p 3 -t 8
 `ASV_table_BLCA_ncbi.tsv` &rarr; ASV read count table including BLCA NCBI classification \
 `ngs4_16S_blca_ncbi_DATE_TIME.log` &rarr; Pipeline log file
 
-
+#
 
 ### &rarr; 18S rRNA genes (eukaryotes)
 
