@@ -225,7 +225,7 @@ ngs4_16S_blca \
 To run BLCA with [NCBIs 16S rRNA gene database](https://ftp.ncbi.nlm.nih.gov/blast/db/16S_ribosomal_RNA.tar.gz) on your data after `ngs4_16S` has finished, process your data with `4_16S_blca_ncbi` (Note: every time you start the script the most recent version of the database will be downloaded) as follows:
 
 ```
-ngs4_16S_blca -i ~/ngs4_16S -p 3 -t 8
+ngs4_16S_blca_ncbi -i ~/ngs4_16S -p 3 -t 8
 ```
 
 #### Output
