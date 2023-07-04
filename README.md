@@ -88,8 +88,10 @@ ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
 
 Download GTDB-tk and PLSDB databases for `ngs4_np_assembly`
 ```
-#ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
+ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
+Note: GTDBtk database download is very slow, a mirror of the database will be available soon
+
 
 Download precompiled kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
 ```
@@ -207,11 +209,11 @@ ngs4_16S \
          -h     Print this help
 ```
 
-#### Taxonomy assignment via BLCA using Silva or NCBIs 16S rRNA gene database
+#### Taxonomy assignment via BLCA using SILVA or NCBIs 16S rRNA gene database
 
-Optional: Since `ngs4_16S` is using a "simple" blastn (megablast) to infer taxonomy of the ASVs you might want to use a more sophisticated approach for taxonomic assignment. You can use bayesian-based lowest common ancestor [(BLCA)](https://github.com/qunfengdong/BLCA) classification method on your data. This will take more computation time (depending on the diversity/amount of ASVs of your samples) mainly due to BLCA performing a blastn and a clustalo alignment of the ASV sequences.
+Optional: Since `ngs4_16S` is using a "simple" blastn (megablast, best hit) to infer taxonomy of the ASVs you might want to use a more sophisticated approach for taxonomic assignment. You can use bayesian-based lowest common ancestor [(BLCA)](https://github.com/qunfengdong/BLCA) classification method on your data. This will take more computation time (depending on the diversity/amount of ASVs of your samples & your hardware) mainly due to BLCA performing a blastn and a clustalo alignment of the ASV sequences.
 
-There are two scripts: `ngs4_16S_blca` which is BLCA with the SILVA 138.1 database and `ngs4_16S_blca_ncbi` which is BLCA against NCBIs 16S rRNA database (Note: the database will be downloaded and taxonomy will be compiled every time you run the script).
+There are two scripts: `ngs4_16S_blca` which is BLCA with the SILVA 138.1 database and `ngs4_16S_blca_ncbi` which is BLCA against NCBIs 16S rRNA database.
 
 To run BLCA with SILVA on your data after `ngs4_16S` has finished, process your data with `ngs4_16S_blca` as follows:
 
@@ -222,7 +224,7 @@ ngs4_16S_blca \
 -p 3 -t 8
 ```
 
-To run BLCA with [NCBIs 16S rRNA gene database](https://ftp.ncbi.nlm.nih.gov/blast/db/16S_ribosomal_RNA.tar.gz) on your data after `ngs4_16S` has finished, process your data with `4_16S_blca_ncbi` (Note: every time you start the script the most recent version of the database will be downloaded) as follows:
+To run BLCA with [NCBIs 16S rRNA gene database](https://ftp.ncbi.nlm.nih.gov/blast/db/16S_ribosomal_RNA.tar.gz) on your data after `ngs4_16S` has finished, process your data with `ngs4_16S_blca_ncbi` (Note: every time you start the script the most recent version of the database will be downloaded) as follows:
 
 ```
 ngs4_16S_blca_ncbi -i ~/ngs4_16S -p 3 -t 8
@@ -333,6 +335,12 @@ Sample_2.fastq.gz
 Sample_3.fastq.gz
 etc.
 ```
+
+Note: Before you can perform a test run with the example data, you have to download the example data ([Zymo-gut-mock-Kit20 (SRR17913199)](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR17913199&display=metadata) described in the [NanoPhase paper](https://link.springer.com/article/10.1186/s40168-022-01415-8)):
+```
+ngs4_download_np_example -i ~/ngs4ecoprod/ngs4ecoprod/example_data
+```
+
 
 #### Quality filter your reads with:
 ```
@@ -479,7 +487,7 @@ Since this repository currently has no associated publication, please cite via t
 
 ## tl;dr
 
-Install ngs4ecoprod
+&rarr; Install ngs4ecoprod & download SILVA database
 ```
 wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 bash install_ngs4ecoprod -i ~/ngs4ecoprod
@@ -489,7 +497,7 @@ rm -f install_ngs4ecoprod
 ngs4_download_silva_db -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
 
-16S rRNA gene amplicon pipeline
+&rarr; 16S rRNA gene amplicon pipeline on example (or your data)
 ```
 ngs4_16S -i ~/ngs4ecoprod/ngs4ecoprod/example_data/16S -o ~/ngs4_16S -d ~/ngs4ecoprod/ngs4ecoprod/db/silva -p 3 -t 8
 ```
