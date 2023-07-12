@@ -101,8 +101,8 @@ rm Miniconda3-py310_23.5.0-3-Linux-x86_64.sh* -f
 echo
 echo -e "\033[1;33mInstalling mamba..."
 echo -e "\e[37m"
-$install_dir/bin/conda install mamba -n base -c conda-forge -y
-#$install_dir/bin/conda install mamba=1.4.6 -n base -c conda-forge -y
+#$install_dir/bin/conda install mamba -n base -c conda-forge -y
+$install_dir/bin/conda install mamba=1.4.6 -n base -c conda-forge -y
 # LDAP user file permission issue
 chmod +x $install_dir/bin/*
 
