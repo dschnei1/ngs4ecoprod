@@ -88,7 +88,7 @@ wget -q --show-progress -c https://ccb-microbe.cs.uni-saarland.de/plsdb/plasmids
 
 # Code from NanoPhase to add databases to conda env
 ## setting location
-echo "export GTDBTK_DATA_PATH=$install_dir/gtdbtk_r214_data" > $(dirname $(dirname `which nanophase`))/etc/conda/activate.d/np_db.sh
+echo "export GTDBTK_DATA_PATH=$install_dir/gtdbtk/release214" > $(dirname $(dirname `which nanophase`))/etc/conda/activate.d/np_db.sh
 echo "export PLSDB_PATH=$install_dir/plsdb" >> $(dirname $(dirname `which nanophase`))/etc/conda/activate.d/np_db.sh
 #conda deactivate && activate_ngs4ecoprod ## require re-activate ngs4ecoprod
 
