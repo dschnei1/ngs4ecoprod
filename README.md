@@ -6,7 +6,7 @@ NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome d
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon analysis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
 
-The pipeline was tested under Linux (Ubuntu 14.04 LTS, 20.04, 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the linux operating system it is installed on.
+The pipeline was tested under Linux (Ubuntu 20.04 & 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the linux operating system it is installed on.
 
 ## Table of contents
 1. [Installation](#installation)
@@ -32,7 +32,7 @@ The current disk space requirement for the installation is approximately 23 GB w
 ### User installation, local
 
 ```
-# 1. Download install_ngs4ecoprod bash installation script
+# 1. Download installation script
 wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
@@ -53,7 +53,7 @@ rm -f install_ngs4ecoprod
 ### Admin installation, system wide
 
 ```
-# 1. Download install_ngs4ecoprod bash installation script
+# 1. Download bash installation script
 wget https://raw.githubusercontent.com/dschnei1/ngs4ecoprod/main/install_ngs4ecoprod
 
 # 2. Install ngs4ecoprod (in this example into your home ~/ngs4ecoprod)
