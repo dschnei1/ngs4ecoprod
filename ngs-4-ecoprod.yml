@@ -46,4 +46,4 @@ dependencies:
   - samtools>=v1.17
   - fastani>=v1.33
   - libopenblas>=v0.3.21
-  - pydantic=v1.10.9
+  - pydantic=v1.10
