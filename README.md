@@ -21,7 +21,7 @@ The pipeline was tested under Linux (Ubuntu 20.04 & 22.04 LTS) and is encapsuled
 
 ## Installation
 
-### NOTE: After the recent updates of miniconda and mamba (12th of July), installation is semi broken - I'm still looking for solutions (working conda/mamba versions).
+### NOTE: After the recent updates of miniconda and mamba (12th of July), installation seems to work only on more recent Linux distributions (2020 and up).
 
 You can either install the pipeline as a [user](#user-installation-local) into your home or as server [admin](#admin-installation-system-wide) in - for example - `/opt` and make it accessable for every user via an alias in the users `.bashrc` or corresponding shell (e.g., zsh, ksh, tcsh etc.).
 
