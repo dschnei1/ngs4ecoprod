@@ -82,7 +82,7 @@ echo -e "\e[37m"
 
 # Modified from NanoPhase
 ## download database: May skip if you have done before or GTDB and PLSDB have been downloaded in the server
-wget -q --show-progress -c https://data.gtdb.ecogenomic.org/releases/release214/214.0/auxillary_files/gtdbtk_r214_data.tar.gz --directory-prefix $install_dir/gtdbtk && tar -xzf $install_dir/gtdbtk/gtdbtk_r214_data.tar.gz -C install_dir/gtdbtk && rm -f $install_dir/gtdbtk/gtdbtk_r214_data.tar.gz
+wget -q --show-progress -c https://data.gtdb.ecogenomic.org/releases/release214/214.0/auxillary_files/gtdbtk_r214_data.tar.gz --directory-prefix $install_dir/gtdbtk && tar -xzf $install_dir/gtdbtk/gtdbtk_r214_data.tar.gz -C $install_dir/gtdbtk && rm -f $install_dir/gtdbtk/gtdbtk_r214_data.tar.gz
 wget -q --show-progress -c https://ccb-microbe.cs.uni-saarland.de/plsdb/plasmids/download/plsdb.fna.bz2 --directory-prefix $install_dir/plsdb && bunzip2 $install_dir/plsdb/plsdb.fna.bz2
 # need alternative download source
 
