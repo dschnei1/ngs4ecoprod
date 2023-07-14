@@ -81,18 +81,18 @@ echo "Installation folder:             $install_dir"
 echo
 echo -e "\033[1;33mDownloading & installing latest miniconda..."
 echo -e "\e[37m"
-#wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-wget -q https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.0-3-Linux-x86_64.sh
+wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+#wget -q https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.0-3-Linux-x86_64.sh
 # Install miniconda in your home directory
-#bash Miniconda3-latest-Linux-x86_64.sh -b -p $install_dir
-bash Miniconda3-py310_23.5.0-3-Linux-x86_64.sh -b -p $install_dir
+bash Miniconda3-latest-Linux-x86_64.sh -b -p $install_dir
+#bash Miniconda3-py310_23.5.0-3-Linux-x86_64.sh -b -p $install_dir
 
 
 # LDAP user file permission issue
 chmod +x $install_dir/bin/*
 # Remove installer
-#rm Miniconda3-latest-Linux-x86_64.sh* -f
-rm Miniconda3-py310_23.5.0-3-Linux-x86_64.sh* -f
+rm Miniconda3-latest-Linux-x86_64.sh* -f
+#rm Miniconda3-py310_23.5.0-3-Linux-x86_64.sh* -f
 
 
 
@@ -101,8 +101,8 @@ rm Miniconda3-py310_23.5.0-3-Linux-x86_64.sh* -f
 echo
 echo -e "\033[1;33mInstalling mamba..."
 echo -e "\e[37m"
-#$install_dir/bin/conda install mamba -n base -c conda-forge -y
-$install_dir/bin/conda install mamba=1.4.5 -n base -c conda-forge -y
+$install_dir/bin/conda install mamba -n base -c conda-forge -y
+#$install_dir/bin/conda install mamba=1.4.5 -n base -c conda-forge -y
 # LDAP user file permission issue
 chmod +x $install_dir/bin/*
 
@@ -111,7 +111,7 @@ chmod +x $install_dir/bin/*
 echo
 echo -e "\033[1;33mDownloading ngs4ecoprod..."
 echo -e "\e[37m"
-git clone --recursive https://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@github.com/dschnei1/ngs4ecoprod.git $install_dir/ngs4ecoprod
+git clone --recursive https://github.com/dschnei1/ngs4ecoprod.git $install_dir/ngs4ecoprod
 
 # BLCA
 echo
