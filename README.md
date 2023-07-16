@@ -21,7 +21,7 @@ The pipeline was tested under Linux (Ubuntu 20.04 & 22.04 LTS) and is encapsuled
 
 ## Installation
 
-### NOTE: After the recent updates of miniconda and mamba (12th of July), installation seems to work only on more recent Linux distributions (2020 and up).
+#### NOTE: After the recent updates of miniconda and mamba (12th of July), installation seems to work only on recent Linux distributions (2020 and up).
 
 You can either install the pipeline as a [user](#user-installation-local) into your home or as server [admin](#admin-installation-system-wide) in - for example - `/opt` and make it accessable for every user via an alias in the users `.bashrc` or corresponding shell (e.g., zsh, ksh, tcsh etc.).
 
@@ -97,9 +97,9 @@ ngs4_download_nanophase -i ~/ngs4ecoprod/ngs4ecoprod/db
 Note: GTDBtk database download is very slow, a mirror of the database will be available soon
 
 
-Download precompiled kraken2 and kaiju databases for `ngs4_tax` & `ngs4_np_tax`
+Download precompiled kraken2 (nt) and kaiju (nr) databases for `ngs4_tax` & `ngs4_np_tax`
 ```
-#download_tax_k2k
+#ngs4_download_tax_k2k
 ```
 Note: Need to find a server that supports a 0.6 TB file
 
