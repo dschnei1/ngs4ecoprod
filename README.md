@@ -6,7 +6,7 @@ NGS-4-ECOPROD wrapper/pipeline collection is primarily dedicated to metagenome d
 
 This repository is developed in the framework of [NGS-4-ECOPROD](https://cordis.europa.eu/project/id/101079425) at the University of Göttingen. The pipeline aims to automate and simplify metagenomic workflows (including 16S/18S rRNA gene amplicon analysis, metagenomes derived from Illumina paired-end sequencing, metagenomes derived from Nanopore long-reads etc.).
 
-The pipeline was tested under Linux (Ubuntu 20.04 & 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the linux operating system it is installed on.
+The pipeline was tested under Linux (Ubuntu 20.04 & 22.04 LTS) and is encapsuled in a [miniconda](https://docs.conda.io/en/latest/miniconda.html) environment with the intention to not affect the Linux operating system it is installed on.
 
 ## Table of contents
 1. [Installation](#installation)
@@ -164,7 +164,7 @@ In principle the following steps are performed by the pipeline:
 15. final ASV count table
 16. Optional: for a more robust classification use BLCA against SILVA or NCBIs 16S rRNA
 
-The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the classification by blast.
+The default configuration of the pipeline is for Illumina MiSeq paired-end reads using reagent kit v3 (2x 300 bp, 600 cycles) with the primer pair SD-Bact-0341-b-S-17 and S-D-Bact-0785-a-A-21 proposed by [Klindworth et al. (2013)](https://doi.org/10.1093/nar/gks808). However, by changing the parameters of primer sequence, sequence length, ASV length this pipeline can be used for any overlapping paired-end bacterial or archaeal amplicon raw sequence data (see [options](#options-for-ngs4_16S)). The script also performs a lineage correction (removing uncertain assignments from species to phylum based on percent identity: <98.7 species, <94.5 genus, <86.5 family, <82.0 order, <78.5 class, <75 phylum) as proposed by [Yarza et al. (2014)](https://www.nature.com/articles/nrmicro3330) to avoid over/misinterpretation of the blast classification.
 
 A very basic R script (based on [ampvis2](https://github.com/KasperSkytte/ampvis2)) is provided to start your analyses. I highly recommend to fill the metadata file (metadata.tsv) with all information about the samples that you have at hand. For more information, [microsud](https://github.com/microsud) has compiled an extensive overview of available microbiome analysis [tools](https://microsud.github.io/Tools-Microbiome-Analysis/).
 
@@ -217,9 +217,9 @@ ngs4_16S \
 
 Optional: Since `ngs4_16S` is using a "simple" blastn (megablast, best hit) to infer taxonomy of the ASVs you might want to use a more sophisticated approach for taxonomic assignment. You can use bayesian-based lowest common ancestor [(BLCA)](https://github.com/qunfengdong/BLCA) classification method on your data. This will take more computation time (depending on the diversity/amount of ASVs of your samples & your hardware) mainly due to BLCA performing a blastn and a clustalo alignment of the ASV sequences.
 
-There are two scripts: `ngs4_16S_blca` which is BLCA with the SILVA 138.1 database and `ngs4_16S_blca_ncbi` which is BLCA against NCBIs 16S rRNA database.
+There are two scripts: `ngs4_16S_blca` which uses BLCA with the SILVA 138.1 database and `ngs4_16S_blca_ncbi` which uses BLCA against NCBIs 16S rRNA database.
 
-To run BLCA with SILVA on your data after `ngs4_16S` has finished, process your data with `ngs4_16S_blca` as follows:
+To run BLCA with SILVA on your data **after** `ngs4_16S` has finished, process your data with `ngs4_16S_blca` as follows:
 
 ```
 ngs4_16S_blca \
@@ -259,7 +259,7 @@ ngs4_16S_blca_ncbi -i ~/ngs4_16S -p 3 -t 8
 
 ### &rarr; 18S rRNA genes (eukaryotes)
 
-This pipeline can be used for 18S rRNA gene amplicons and is very similar to the 16S rRNA gene pipeline, except that the Yarza correction is not applied to the blastn hits. Default settings are currently set to match the primer pair TAReuk454FWD1 and TAReukREV3 designed by [Stoeck et al. (2015)](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2009.04480.x).
+This pipeline is intended for use with 18S rRNA gene amplicons and is very similar to the 16S rRNA gene pipeline, except that the Yarza correction is not applied to the blastn hits. Default settings are currently set to match the primer pair TAReuk454FWD1 and TAReukREV3 designed by [Stoeck et al. (2015)](https://onlinelibrary.wiley.com/doi/10.1111/j.1365-294X.2009.04480.x), but by tweaking the settings (primer sequences, amplicons size) can be adapted to other primers (paired-end sequences must overlap).
 
 #### Run `ngs4_18S` on your data
 
@@ -369,9 +369,9 @@ ngs4_np_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data/nanopore -o ~/ngs4_np -p 3 
 
 To get a "rough" estimate of the taxonomic composition of your metagenomes you can use `ngs4_np_tax` which is a combination of [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju) against NCBIs [nt](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nt.gz) and [nr](https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz), respectively. These tools use large databases and also some more RAM (up to 670 Gb) per process, however, with -m this can be reduced. The script will produce a read count table which you can then analyze in R.
 
-#### Assign taxonomy to your long-reads:
+#### Taxonomic classification of quality-filtered long-reads:
 ```
-ngs4_np_tax -i ~/ngs4_np -d ~/860_EVO_4TB/NGS-4-ECOPROD/db/ -p 1 -t 20 -m
+ngs4_np_tax -i ~/ngs4_np -d ~/ngs4ecoprod/ngs4ecoprod/db/ -p 1 -t 20 -m
 ```
 
 #### Options for `ngs4_np_tax`
@@ -451,7 +451,7 @@ ngs4_qf -i ~/ngs4ecoprod/ngs4ecoprod/example_data -o ~/ngs4_test_run -d ~/ngs4ec
          -h     Print this help
 ```
 
-#### 2. Taxonomic classification of quality filtered paired short-reads 
+#### 2. Taxonomic classification of quality-filtered paired-end reads 
 With this script you assign taxonomy to your data with [Kraken2](https://github.com/DerrickWood/kraken2) and [Kaiju](https://github.com/bioinformatics-centre/kaiju). Both classifications will be merged while Kraken2 annotation (higher precision) is prioritized over Kaiju annotation (higher sensitivity). In the end you will have an relative abundance table with taxonomic assignments.
 
 Note: \
@@ -474,7 +474,7 @@ ngs4_tax -i ~/ngs4_illumina -d ~/ngs4ecoprod/ngs4ecoprod/db -p 1 -t 10 -m
          -h     Print this help
 ```
 
-#### 3. Assembly of of quality filtered short-reads (on hold)
+#### 3. Assembly of quality filtered short-reads (on hold)
 ```
 #ngs4_assemble -i ~/ngs4_illumina
 ```
