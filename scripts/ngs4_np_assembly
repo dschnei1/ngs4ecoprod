@@ -92,8 +92,8 @@ echo "$(parallel --version | head -n 1)"
 nanophase -v | sed "s|v=||g"
 metawrap -v > temp_file && grep "v=" temp_file | sed "s|v=||g" && rm -f temp_file
 echo "flye $(flye -v)"
-metabat2 -h 2> temp_file && grep "version" temp_file | sed "s|: Meta.* (version 2:| |g ; s| (Bioc.*||g" && rm -f temp_file
-maxbin2 -v > temp_file && head -n 1 temp_file && rm -f temp_file
+metabat2 -h 2> temp_file && grep "version" temp_file | sed "s|.*(version |MetaBAT2 | g ; s|;.*||g" && rm -f temp_file
+run_MaxBin.pl -v | head -n 1
 echo "SemiBin $(SemiBin -v)"
 checkm -h > temp_file && grep "CheckM" temp_file | head -n 1 | sed "s|.*: ||g ; s| :.*||g" && rm -f temp_file
 echo "racon $(racon --version)"
