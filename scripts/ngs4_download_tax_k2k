@@ -77,13 +77,14 @@ echo -e "\033[1;31m-------------------------------------------------"
 echo -e "\e[37m"
 echo "Kraken 2 installation folder:    $install_dir/kraken2"
 echo "Kaiju installation folder:       $install_dir/kaiju"
+echo ""
 echo "NOTE: This will take some time, please be patient."
 
 
 
 # Download and extract silva database
 echo
-echo -e "\033[1;33mDownloading & installing silva databse..."
+echo -e "\033[1;33mDownloading & installing preindexed kraken2 and kaiju database..."
 echo -e "\e[37m"
 wget -q --show-progress -c https://data.goettingen-research-online.de/download/kraken2_kaiju.tar.gz && tar -xzf kraken2_kaiju.tar.gz -C $install_dir/ && rm -f kraken2_kaiju.tar.gz
 
