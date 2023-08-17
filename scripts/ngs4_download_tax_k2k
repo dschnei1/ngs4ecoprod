@@ -1,0 +1,95 @@
+#!/bin/bash
+# NGS-4-ECOPROD - Download modified pre-indexed databases for kraken2 and kaiju
+# Dominik Schneider, 2023-08-17
+
+
+
+# Define help
+
+Help()
+{
+   echo
+   echo -e "\033[1;32mSyntax:" 
+   echo -e "\033[0;37mngs4_download_tax_k2k -i <installation_folder_for_databases>"
+   echo
+   echo -e "\033[1;32mExample:"
+   echo -e "\033[0;37mngs4_download_tax_k2k -i ~/ngs4ecoprod/ngs4ecoprod/db"
+   echo
+   echo -e "\033[1;32mOptions:"
+   echo -e "\033[0;37m"
+   echo "         -i     Installation folder of kraken2 and kaiju database"
+   echo "         -h     Print this help"
+   echo
+}
+
+
+
+# Define options
+
+while getopts i:":h" flag
+do
+    case "${flag}" in
+        i) install_dir=${OPTARG};;
+        h) Help;exit;;
+       \?) echo -e "\033[1;31mError: Invalid option";echo -e "\033[0;37m";exit;;
+    esac
+done
+
+
+
+# Error handling
+set -e
+
+if [ $# -eq 0 ]; then
+    >&2 Help
+    exit 1
+fi
+
+IF="$install_dir/kraken2"
+if [ -d "$IF" ]; then
+  echo -e "\033[1;31mError database folder $IF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+if [ ! -d "$IF" ]; then
+  mkdir $install_dir/kraken2
+fi
+
+IF="$install_dir/kaiju"
+if [ -d "$IF" ]; then
+  echo -e "\033[1;31mError database folder $IF exists. Exiting..."
+  echo -e "\033[0;37m"
+  exit 1
+fi
+
+if [ ! -d "$IF" ]; then
+  mkdir $install_dir/kaiju
+fi
+
+
+# Main script
+
+echo
+echo -e "\033[1;31m-------------------------------------------------"
+echo -e "\033[1;31mNGS-4-ECOPROD kraken2 and kaiju database download"
+echo -e "\033[1;31m-------------------------------------------------"
+echo -e "\e[37m"
+echo "Kraken 2 installation folder:    $install_dir/kraken2"
+echo "Kaiju installation folder:       $install_dir/kaiju"
+echo "NOTE: This will take some time, please be patient."
+
+
+
+# Download and extract silva database
+echo
+echo -e "\033[1;33mDownloading & installing silva databse..."
+echo -e "\e[37m"
+wget -q --show-progress -c https://data.goettingen-research-online.de/download/kraken2_kaiju.tar.gz && tar -xzf kraken2_kaiju.tar.gz -C $install_dir/ && rm -f kraken2_kaiju.tar.gz
+
+
+
+# End script
+echo
+echo -e "\033[1;31mNGS-4-ECOPROD preindexed kraken2 and kaiju database downloaded & installation finished"
+echo -e "\033[0;37m"
