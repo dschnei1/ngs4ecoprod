@@ -99,10 +99,8 @@ Note: GTDBtk database download is very slow, a mirror of the database will be av
 
 Download precompiled kraken2 (nt) and kaiju (nr) databases for `ngs4_tax` & `ngs4_np_tax`
 ```
-#ngs4_download_tax_k2k
+ngs4_download_tax_k2k -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
-Note: Need to find a server that supports a 0.6 TB file
-
 
 ## Uninstall NGS-4-ECOPROD
 To remove the pipeline do the following (adapt .bashrc to your shell)
