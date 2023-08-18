@@ -101,7 +101,7 @@ Download precompiled kraken2 (nt) and kaiju (nr) databases for `ngs4_tax` & `ngs
 ```
 ngs4_download_tax_k2k -i ~/ngs4ecoprod/ngs4ecoprod/db
 ```
-Note: Download will be performed in current directory - make sure you have ~580 Gb (+676 Gb if you extract to the same disk) of disk space before starting the download.
+Note: Download will be performed in current directory - make sure you have ~580 Gb (+676 Gb if you install/extract to the same disk) of disk space before starting the download.
 
 ## Uninstall NGS-4-ECOPROD
 To remove the pipeline do the following (adapt .bashrc to your shell)
