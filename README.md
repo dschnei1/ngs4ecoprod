@@ -224,13 +224,13 @@ To run BLCA with SILVA on your data **after** `ngs4_16S` has finished, process y
 ngs4_16S_blca \
 -i ~/ngs4_16S \
 -d ~/ngs4ecoprod/ngs4ecoprod/db/silva \
--p 3 -t 8
+-t 8
 ```
 
 To run BLCA with [NCBIs 16S rRNA gene database](https://ftp.ncbi.nlm.nih.gov/blast/db/16S_ribosomal_RNA.tar.gz) on your data after `ngs4_16S` has finished, process your data with `ngs4_16S_blca_ncbi` (Note: every time you start the script the most recent version of the database will be downloaded) as follows:
 
 ```
-ngs4_16S_blca_ncbi -i ~/ngs4_16S -p 3 -t 8
+ngs4_16S_blca_ncbi -i ~/ngs4_16S -t 8
 ```
 
 #### Output
