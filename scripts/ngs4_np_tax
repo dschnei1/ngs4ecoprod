@@ -163,7 +163,7 @@ parallel --load 80% --noswap -j $processes -a fastqlist 'rm {}.kaiju.classified 
 mkdir 03_merge
 mv *.k2k 03_merge
 
-parallel --load 80% --noswap -j $processes -a fastqlist 'addTaxonNames -t '$db_path'/kaiju/nodes.dmp -n '$db_path'/kaiju/names.dmp -r superkingdom,phylum,class,order,family,genus,species -i 03_merge/{}.k2k -o {}.tax_table'
+parallel --load 80% --noswap -j $processes -a fastqlist 'kaiju-addTaxonNames -t '$db_path'/kaiju/nodes.dmp -n '$db_path'/kaiju/names.dmp -r superkingdom,phylum,class,order,family,genus,species -i 03_merge/{}.k2k -o {}.tax_table'
 parallel --load 80% --noswap -j $processes -a fastqlist 'sed -i -e "s/; \([^; ]*\)$/\1/" {}.tax_table'
 sed -i "s/'//g" *.tax_table
 sed -i 's/"//g' *.tax_table
