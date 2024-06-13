@@ -70,12 +70,12 @@ if [ $# -eq 0 ]; then
 fi
 
 if [[ -z "$input_folder" ]]; then
-    echo -e "\033[1;31mError: input folder path -i not set! ngs4_qf -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[1;31mError: input folder path -i not set! ngs4_tax -h to see all necessary options\033[0;37m" 1>&2
     exit 1
 fi
 
 if [[ -z "$db_path" ]]; then
-    echo -e "\033[1;31mError: database path -d not set! ngs4_qf -h to see all necessary options\033[0;37m" 1>&2
+    echo -e "\033[1;31mError: database path -d not set! ngs4_tax -h to see all necessary options\033[0;37m" 1>&2
     exit 1
 fi
 
