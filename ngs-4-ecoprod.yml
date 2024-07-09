@@ -24,7 +24,7 @@ dependencies:
   - kraken2>=v2.1.2
   - kaiju>=v1.9.2
   - vsearch>=v2.22.1
-  - blast>=v2.13.0
+  - bioconda::blast
   - fasttree>=v2.1.11
   - mafft>=v7.515
   - porechop_abi>=v0.5.0
