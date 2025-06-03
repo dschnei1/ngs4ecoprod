@@ -164,12 +164,12 @@ ln -s $install_dir/BLCA/*.py $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/NanoPhase/bin/* $install_dir/envs/ngs-4-ecoprod/bin/
 ln -s $install_dir/sra-toolkit/bin/prefetch $install_dir/envs/ngs-4-ecoprod/bin/prefetch
 ln -s $install_dir/sra-toolkit/bin/fasterq-dump $install_dir/envs/ngs-4-ecoprod/bin/fasterq-dump
-ln -s $install_dir/envs/gtdbtk/bin/gtdbtk $install_dir/envs/ngs-4-ecoprod/bin/
-ln -s $install_dir/envs/gtdbtk/bin/download-db.sh $install_dir/envs/ngs-4-ecoprod/bin/
-ln -s $install_dir/envs/gtdbtk/bin/tqdm $install_dir/envs/ngs-4-ecoprod/bin/
-ln -s $install_dir/envs/gtdbtk/bin/pplacer $install_dir/envs/ngs-4-ecoprod/bin/
-ln -s $install_dir/envs/gtdbtk/bin/guppy $install_dir/envs/ngs-4-ecoprod/bin/
-ln -s $install_dir/envs/gtdbtk/bin/skani $install_dir/envs/ngs-4-ecoprod/bin/
+ln -s $install_dir/envs/gtdbtk/bin/gtdbtk $install_dir/envs/ngs-4-ecoprod/bin/ -f
+ln -s $install_dir/envs/gtdbtk/bin/download-db.sh $install_dir/envs/ngs-4-ecoprod/bin/ -f
+ln -s $install_dir/envs/gtdbtk/bin/tqdm $install_dir/envs/ngs-4-ecoprod/bin/ -f
+ln -s $install_dir/envs/gtdbtk/bin/pplacer $install_dir/envs/ngs-4-ecoprod/bin/ -f
+ln -s $install_dir/envs/gtdbtk/bin/guppy $install_dir/envs/ngs-4-ecoprod/bin/ -f
+ln -s $install_dir/envs/gtdbtk/bin/skani $install_dir/envs/ngs-4-ecoprod/bin/ -f
 # Ensure all scripts are executable
 chmod +x $install_dir/ngs4ecoprod/scripts/*
 chmod +x $install_dir/BLCA/*.py
