@@ -141,7 +141,7 @@ wget -q --show-progress -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.5/srat
 echo
 echo -e "\033[1;33mInstalling ngs4ecoprod..."
 echo -e "\e[37m"
-$install_dir/bin/mamba env create -n ngs-4-ecoprod -f $install_dir/ngs4ecoprod/ngs-4-ecoprod.yml
+$install_dir/bin/mamba env create -y -n ngs-4-ecoprod -f $install_dir/ngs4ecoprod/ngs-4-ecoprod.yml
 
 # Install GTDBtk
 echo
