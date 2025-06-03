@@ -148,7 +148,7 @@ echo
 echo -e "\033[1;33mInstalling GTDBtk..."
 echo -e "\e[37m"
 wget -q --show-progress https://anaconda.org/bioconda/gtdbtk/2.3.0/download/noarch/gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
-$install_dir/bin/mamba install gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2 -n ngs-4-ecoprod
+$install_dir/bin/mamba install -y gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2 -n ngs-4-ecoprod
 rm -f gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
 
 
