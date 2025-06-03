@@ -147,10 +147,10 @@ $install_dir/bin/mamba env create -y -n ngs-4-ecoprod -f $install_dir/ngs4ecopro
 echo
 echo -e "\033[1;33mInstalling GTDBtk..."
 echo -e "\e[37m"
-wget -q --show-progress https://anaconda.org/bioconda/gtdbtk/2.3.0/download/noarch/gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
-$install_dir/bin/mamba install -y gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2 -n ngs-4-ecoprod
-rm -f gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
-
+#wget -q --show-progress https://anaconda.org/bioconda/gtdbtk/2.3.0/download/noarch/gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
+#$install_dir/bin/mamba install -y gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2 -n ngs-4-ecoprod
+#rm -f gtdbtk-2.3.0-pyhdfd78af_2.tar.bz2
+$install_dir/bin/mamba create -y -n gtdbtk -c conda-forge -c bioconda gtdbtk=2.4.0
 
 
 # 5. Link scripts and allow execution
@@ -173,7 +173,7 @@ chmod +x $install_dir/sra-toolkit/bin/*
 #sed -i.bak "s|^#!/usr/bin/env python|#!$install_dir/envs/ngs-4-ecoprod/bin/python|g ; s|str(eset), '-perc_identity', '90'|str(eset), '-perc_identity', '70'|g" $install_dir/BLCA/*.py
 sed -i.bak "s|^#!/usr/bin/env python|#!$install_dir/envs/ngs-4-ecoprod/bin/python|g" $install_dir/BLCA/*.py
 # Modify NanoPhase for GTDBtk v2.3.0 and fix SemiBin
-sed -i.bak "s|gtdbtk classify_wf |gtdbtk classify_wf --skip_ani_screen |g ; s|semibin/semibin-output/output_bins\`|semibin/semibin-output/output_bins/*\`|g" $install_dir/NanoPhase/bin/*
+#sed -i.bak "s|gtdbtk classify_wf |gtdbtk classify_wf --skip_ani_screen |g ; s|semibin/semibin-output/output_bins\`|semibin/semibin-output/output_bins/*\`|g" $install_dir/NanoPhase/bin/*
 sed -i  "s|ln -s|#ln -s|g ; s|02-LongBins/INITIAL_BINNING/semibin/semibin-bins |02-LongBins/INITIAL_BINNING/semibin/semibin-output/output_bins |g ; s|02-LongBins/INITIAL_BINNING/semibin/semibin-bins\.|02-LongBins/INITIAL_BINNING/semibin/semibin-output/output_bins\.|g" $install_dir/NanoPhase/bin/nanophase.meta
 sed -i "s*03-Polishing/Final-bins/tmp.taxa | awk '{print*03-Polishing/Final-bins/tmp.taxa | sed 's| |_|g' | awk '{print*g" $install_dir/NanoPhase/bin/nanophase.meta
 #sed -i.bak "s|gtdbtk classify_wf |gtdbtk classify_wf --skip_ani_screen |g ; s|#mkdir -p |mkdir -p |g ; s|semibin/semibin-output/output_bins\`|semibin/semibin-output/output_bins/*\`|g" $install_dir/NanoPhase/bin/*
